@@ -1,0 +1,12 @@
+King of the Island:
+- Github Respository: https://github.com/carlosarnau/King-of-the-Island
+- Github Release: https://github.com/carlosarnau/King-of-the-Island/releases
+- Contributions:
+	-
+- Instructions:
+	-
+- The main scene to run is "Lobby".
+- Difficulties, comments, bugs and other considerations:
+	-
+- Improvements:
+	-
