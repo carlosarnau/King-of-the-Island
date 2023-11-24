@@ -2,11 +2,16 @@ King of the Island:
 - Github Respository: https://github.com/carlosarnau/King-of-the-Island
 - Github Release: https://github.com/carlosarnau/King-of-the-Island/releases
 - Contributions:
-	-
+	- 
 - Instructions:
 	-
 - The main scene to run is "Lobby".
+Once in the lobby, you may enter a nickname and the target ip address (if the program is going to be the server, the ip doesn't matter)
+Please first startup the server, then the client
+Once in game, move the character in the client, and it should appear so in the server. 
+(At this moment we don't have a packet limiter, so it's sending so much packets that the server goes slow) >.<
 - Difficulties, comments, bugs and other considerations:
-	-
+	- At this moment we don't have a packet limiter, so it's sending so much packets that the server goes slow
+	- 
 - Improvements:
 	-
