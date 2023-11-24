@@ -5,7 +5,7 @@ using System.Net.Sockets;
 using System.Net;
 using System.Text;
 using UnityEngine;
-using UnityEditor.VersionControl;
+
 
 public class UDPServer : MonoBehaviour
 {
@@ -30,6 +30,13 @@ public class UDPServer : MonoBehaviour
     public List<Player> playersOnline = new List<Player>();
     public GameObject playerFromClient;
     public Packet lastPacket;
+
+    private void Awake()
+    {
+        if ((PlayerPrefs.GetInt("isServer")) != 1)
+            this.gameObject.SetActive(false);
+    }
+
     private void Start()
     {
         playerFromClient = GameObject.Find("PlayerFromClient");

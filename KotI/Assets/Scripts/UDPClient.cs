@@ -5,16 +5,29 @@ using System.Net.Sockets;
 using System.Net;
 using System.Text;
 using UnityEngine;
-using UnityEditor.VersionControl;
 
 public class UDPClient : MonoBehaviour
 {
     public string serverIP = "127.0.0.1"; // Replace with the server's IP address.
     public int serverPort = 12345; // Specify the port the server is listening on.
-
+    public string username = "Unknown";
     public UdpClient udpClient;
     public IPEndPoint serverEndPoint;
     public GameObject clientPlayer;
+
+    private void Awake()
+    {
+        if ((PlayerPrefs.GetInt("isServer")) != 0)
+            this.gameObject.SetActive(false);
+
+        if (PlayerPrefs.GetString("ipAddress") != null)
+            serverIP = PlayerPrefs.GetString("ipAddress");
+
+        if (PlayerPrefs.GetString("username") != null)
+            username = PlayerPrefs.GetString("username");
+
+    }
+
     private void Start()
     {
 
@@ -29,7 +42,7 @@ public class UDPClient : MonoBehaviour
             // Send a message to the server.
             string message = "Hello from the client!";
             //byte[] messageBytes = Encoding.UTF8.GetBytes(message);
-            Packet pack = new Packet("Manolo", Status.Connect, new Vector3(0, 1, 0), message);
+            Packet pack = new Packet(username, Status.Connect, new Vector3(0, 1, 0), message);
 
 
             byte[] messageBytes = SerializePacket(pack);  //Encoding.UTF8.GetBytes(responseMessage);
@@ -54,7 +67,7 @@ public class UDPClient : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.P)) 
         {
         }
-            Packet pack = new Packet("Manolo", Status.Movement, clientPlayer.transform.position, "I have moved");
+            Packet pack = new Packet(username, Status.Movement, clientPlayer.transform.position, "I have moved");
             byte[] messageBytes = SerializePacket(pack);  //Encoding.UTF8.GetBytes(responseMessage);
             udpClient.Send(messageBytes, messageBytes.Length, serverEndPoint);
         //if (Input.GetKeyDown(KeyCode.C))
