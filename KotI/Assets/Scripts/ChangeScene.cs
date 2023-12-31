@@ -11,6 +11,12 @@ public class ChangeScene : MonoBehaviour
     public InputField usernameInput;
     public InputField ipInput;
     public Toggle isServerButton;
+
+    public void Start()
+    {
+        PlayerPrefs.SetString("ClientStatus", ClientStatus.Menu.ToString());
+    }
+
     public void SceneChange(string sceneName)
     {
         string username = usernameInput.text;
@@ -23,8 +29,17 @@ public class ChangeScene : MonoBehaviour
         PlayerPrefs.SetString("username", username);
         PlayerPrefs.SetString("ipAddress", ip);
         PlayerPrefs.SetInt("isServer", isServer);
-        Debug.Log(PlayerPrefs.GetString("username") + PlayerPrefs.GetString("ipAddress") + PlayerPrefs.GetInt("isServer"));
+        PlayerPrefs.SetString("ClientStatus", ClientStatus.Ingame.ToString());
+        //Debug.Log(PlayerPrefs.GetString("username") + PlayerPrefs.GetString("ipAddress") + PlayerPrefs.GetInt("isServer"));
         SceneManager.LoadScene(sceneName);
+
+    }
+
+    public enum ClientStatus
+    {
+        Menu,
+        Ingame,
+        Disconnected
     }
 
     public void QuitGame()

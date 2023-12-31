@@ -754,6 +754,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   serverIP: 127.0.0.1
   serverPort: 12345
+  username: Unknown
   clientPlayer: {fileID: 71600964}
 --- !u!4 &808911100
 Transform:
