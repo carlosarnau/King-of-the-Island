@@ -5,7 +5,7 @@ using System.Net.Sockets;
 using System.Net;
 using System.Text;
 using UnityEngine;
-using Newtonsoft.Json;
+//using Newtonsoft.Json;
 
 public class Server : MonoBehaviour
 {
@@ -14,25 +14,79 @@ public class Server : MonoBehaviour
 
     public UdpClient udpListener;
     public GameObject playerPrefab;
-    public class Player
-    {
-        public string userID;
-        public GameObject userGO;
-        public Vector3 position;
-        public IPEndPoint ip;
-        public Player(string userID, GameObject userGO, Vector3 position, IPEndPoint ip)
-        {
-            this.userID = userID;
-            this.userGO = userGO;
-            this.position = position;
-            this.ip = ip;
-        }
-    }
+
 
     public List<Player> playersOnline = new List<Player>();
     public GameObject playerFromClient;
     public Packet lastPacket;
 
+    [Serializable]
+    public class Player
+    {
+        public string userID;
+        public Vector3 position;
+        //public float x, y, z;
+        public IPEndPoint ip;
+        public Player(string userID_, GameObject userGO_, Vector3 position_, IPEndPoint ip_)
+        {
+            userID = userID_;
+            position = position_;
+            //x = position_.x;
+            //y = position_.y;
+            //z = position_.z;
+            ip = ip_;
+        }
+    }
+    [Serializable]
+    public class Packet
+    {
+        public string user;
+        public Status status;
+        public Vector3 position;
+        public string message;
+        public IPEndPoint ip;
+        public List<Player> playerList;
+        public List<Object> objectList;
+
+        public Packet(String user, Status status, Vector3 position, string message)
+        {
+            this.user = user;
+            this.status = status;
+            this.position = position;
+            this.message = message;
+            playerList = new List<Player>();
+            objectList = new List<Object>();
+            //this.ip = ip;
+        }
+    }
+    [Serializable]
+    public class Object
+    {
+        public uint objectID { get; set; }
+        public Vector3 position { get; set; }
+        public ObjectType type { get; set; }
+
+        public Object(uint objectID, Vector3 position, ObjectType type)
+        {
+            this.objectID = objectID;
+            this.position = position;
+            this.type = type;
+        }
+    }
+    public enum ObjectType
+    {
+        Item,
+        unknown
+    }
+    public enum Status
+    {
+        Idle,
+        Connect,
+        Replication,
+        Disconnect,
+        Chat,
+        Movement
+    }
     private void Awake()
     {
         if ((PlayerPrefs.GetInt("isServer")) != 1)
@@ -95,7 +149,7 @@ public class Server : MonoBehaviour
         if (lastPacket != null)
             ProcessPacket(lastPacket);
         
-        //TODO send world replication hehe
+        //TODO update world
 
         
 
@@ -105,16 +159,16 @@ public class Server : MonoBehaviour
     {
         while (true)
         {
-            RepPacket pack = new RepPacket(Status.Replication, "Replication");
-            pack.playersList = new List<Player>();
+
             if (playersOnline.Count > 0)
             {
+                Packet pack = new Packet("Server", Status.Replication, new Vector3(0,0,0),"Replication");
                 foreach (Player player in playersOnline)
                 {
-                    pack.playersList.Add(player);
+                    pack.playerList.Add(player);
                 }
-                string messageString = JsonConvert.SerializeObject(pack);  //Encoding.UTF8.GetBytes(responseMessage);
-                byte[] messageBytes = Encoding.ASCII.GetBytes(messageString);
+                //string messageString = JsonConvert.SerializeObject(pack/*, new JsonSerializerSettings() { ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore }*/);  //Encoding.UTF8.GetBytes(responseMessage); <<  get cancer
+                byte[] messageBytes = SerializePacket(pack);
 
                 foreach (Player player in playersOnline)
                 {
@@ -123,15 +177,8 @@ public class Server : MonoBehaviour
                 }
 
             }
-
             //TODO foreach Object add object to objectsList
-            yield return new WaitForSeconds(1.0f/interval);
-
-
-
-            //RepPacket pk = new Packet(username, Status.Movement, clientPlayer.transform.position, "I have moved");
-
-            
+            yield return new WaitForSeconds(1.0f/interval);            
         }
     }
 
@@ -143,7 +190,7 @@ public class Server : MonoBehaviour
             {
                 Player newPlayer = new Player(pack.user, GameObject.Find("PlayerFromClient"), new Vector3(0, 0, 0), pack.ip);
                 playersOnline.Add(newPlayer);
-            Debug.Log("Player joined:" + newPlayer.userID);
+                Debug.Log("Player joined:" + newPlayer.userID + newPlayer.ip + pack.ip);
             }
             // Uncomment this block when you have the implementation for chat
             //if (lastPacket.status == Status.Chat)
@@ -153,7 +200,7 @@ public class Server : MonoBehaviour
 
             if (pack.status == Status.Movement)
             {
-                playerFromClient.transform.position = new Vector3(pack.position.x, pack.position.y + 5, pack.position.z);
+                playerFromClient.transform.position = pack.position;
                 // TODO: Update Players List
             }
 
@@ -192,6 +239,7 @@ public class Server : MonoBehaviour
         ////Debug.Log("Received message from " + remoteEndPoint + ": " + message.message);
 
         lastPacket = message;
+        lastPacket.ip = remoteEndPoint;
 
         string messageToSend = "";
 
@@ -209,8 +257,8 @@ public class Server : MonoBehaviour
         // Example: Sending a response to the client.
         //string responseMessage = "Hello from the server!";
 
-        Packet pack = new Packet("Server", Status.Idle, new Vector3(0, 0, 0), messageToSend, remoteEndPoint);
-
+        Packet pack = new Packet("Server", Status.Idle, new Vector3(0, 0, 0), messageToSend);
+        pack.ip = remoteEndPoint;
 
         byte[] responseBytes = SerializePacket(pack);  //Encoding.UTF8.GetBytes(responseMessage);
         udpListener.Send(responseBytes, responseBytes.Length, remoteEndPoint);
@@ -224,71 +272,7 @@ public class Server : MonoBehaviour
         }
     }
 
-
-    public class Packet
-    {
-        public string user;
-        public Status status;
-        public Vector3 position;
-        public string message;
-        public IPEndPoint ip;
-        public Packet(String user, Status status, Vector3 position, string message, IPEndPoint ip)
-        {
-            this.user = user;
-            this.status = status;
-            this.position = position;
-            this.message = message;
-            this.ip = ip;
-        }
-    }
-
-    public class RepPacket
-    {
-        public Status status;
-        public string message;
-        public List<Player> playersList;
-        public List<Object> objectsList;
-        //TODO add list of players
-        //TODO add list of objects
-
-        public RepPacket(Status status, string message/*, List<Player> players, List<Object> objects*/)
-        {
-            this.status = status;
-            this.message = message;
-            //this.playersList = players;
-            //this.objectsList = objects;
-        }
-    }
-
-    public class Object
-    {
-        public uint objectID { get; set; }
-        public Vector3 position { get; set; }
-        public ObjectType type { get; set; }
-
-        public Object(uint objectID, Vector3 position, ObjectType type)
-        {
-            this.objectID = objectID;
-            this.position = position;
-            this.type = type;
-        }
-    }
-
-    public enum ObjectType
-    {
-        Item, 
-        unknown
-    }
-
-    public enum Status
-    {
-        Connect, 
-        Replication,
-        Disconnect, 
-        Chat,
-        Movement,
-        Idle
-    }
+    
 
     public byte[] SerializePacket(Packet toSend)
     {
