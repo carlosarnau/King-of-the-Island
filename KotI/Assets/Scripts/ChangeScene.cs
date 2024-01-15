@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -22,7 +20,7 @@ public class ChangeScene : MonoBehaviour
         string username = usernameInput.text;
         if (string.IsNullOrEmpty(username)) username = "Unknown Username";
         string ip = ipInput.text;
-        if (string.IsNullOrEmpty(ip)) ip= "127.0.0.1";
+        if (string.IsNullOrEmpty(ip)) ip = "127.0.0.1";
         int isServer = isServerButton.isOn ? 1 : 0;
 
 

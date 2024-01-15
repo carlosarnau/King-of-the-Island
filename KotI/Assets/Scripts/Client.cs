@@ -1,14 +1,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Net.Sockets;
 using System.Net;
-using System.Text;
+using System.Net.Sockets;
 using UnityEngine;
-using Random = UnityEngine.Random;
 //using Newtonsoft.Json;
 using static Server;
-using Unity.VisualScripting.Antlr3.Runtime;
+using Random = UnityEngine.Random;
 
 public class Client : MonoBehaviour
 {
@@ -37,6 +35,8 @@ public class Client : MonoBehaviour
 
     private void Start()
     {
+
+
         try
         {
             // Create a UDP client.
@@ -49,7 +49,7 @@ public class Client : MonoBehaviour
             Vector3 col = new Vector3(Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f));
             string message = JsonUtility.ToJson(col);
             //byte[] messageBytes = Encoding.UTF8.GetBytes(message);
-            Packet pack = new Packet(username, Status.Connect, new Vector3(0, 1, 0), message);
+            Packet pack = new Packet(username, Status.Connect, new Vector3(0, 1, 0), Quaternion.identity, message);
 
 
             byte[] messageBytes = SerializePacket(pack);  //Encoding.UTF8.GetBytes(responseMessage);
@@ -68,17 +68,17 @@ public class Client : MonoBehaviour
             Debug.LogError("Error setting up UDP client: " + e.Message);
         }
         StartCoroutine(SendPacket(30.0f));
-        StartCoroutine(WaitForMessages());
+        StartCoroutine(WaitForMessages(60.0f));
         //StartCoroutine(ProcessReplication(30.0f));
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.P)) 
+        if (Input.GetKeyDown(KeyCode.P))
         {
             string message = "Hello from the client!";
             //byte[] messageBytes = Encoding.UTF8.GetBytes(message);
-            Packet pack = new Packet(username, Status.Connect, new Vector3(0, 1, 0), message);
+            Packet pack = new Packet(username, Status.Connect, new Vector3(0, 1, 0), Quaternion.identity, message);
 
 
             byte[] messageBytes = SerializePacket(pack);  //Encoding.UTF8.GetBytes(responseMessage);
@@ -89,23 +89,37 @@ public class Client : MonoBehaviour
         //PROCESS REPLICATION
         if (lastRepPacket != null)
         {
-            if (players.Count != lastRepPacket.playerList.Count)
+            players.Clear();
+            playerObjects.Clear();
+            if (players.Count > 0)
             {
                 Debug.Log("Client detected a Player has connected");
-                players.Clear();
                 foreach (Player player in lastRepPacket.playerList)
                 {
                     players.Add(player);
+                    GameObject temp = new GameObject(player.userID);
 
+                    playerObjects.Add(temp);
                 }
+            }
+            
+            for (int i = 0; i < lastRepPacket.playerList.Count; i++)
+            {
+                players.Add(lastRepPacket.playerList[i]);
+                //if ()
             }
             //TODO foreach Object add object to objectsList
             foreach (Player player in lastRepPacket.playerList)
             {
 
             }
+            //UPDATE PLAYER POSITIONS AND ROTATIONS
+            for (int i = 0; i < players.Count; i++)
+            {
+                playerObjects[i].transform.SetPositionAndRotation(players[i].position, players[i].rotation);
+                //if ()
+            }
 
-            
 
             lastRepPacket = null;
             Debug.Log("Client processed a packet successfully");
@@ -121,7 +135,7 @@ public class Client : MonoBehaviour
         //}
     }
 
-    private IEnumerator WaitForMessages()
+    private IEnumerator WaitForMessages(float interval)
     {
         while (true)
         {
@@ -134,40 +148,40 @@ public class Client : MonoBehaviour
             {
                 Debug.LogError("Error waiting for message UDP server: " + e.Message);
             }
-            yield return null;
+            yield return new WaitForSeconds(1.0f / interval);
         }
     }
 
-    //private IEnumerator ProcessReplication(float interval)
-    //{
-    //    while (true)
-    //    {
-    //        if (lastRepPacket != null)
-    //        {
-    //            if (players.Count != lastRepPacket.playerList.Count)
-    //                Debug.Log("Client detected a Player has connected or disconnected");
-    //            //TODO foreach Object add object to objectsList
+    private IEnumerator ProcessReplication(float interval)
+    {
+        while (true)
+        {
+            if (lastRepPacket != null)
+            {
+                if (players.Count != lastRepPacket.playerList.Count)
+                    Debug.Log("Client detected a Player has connected or disconnected");
+                //TODO foreach Object add object to objectsList
 
 
-    //            //foreach (Player player in playersOnline)
-    //            //{
-    //            //    udpListener.Send(messageBytes, messageBytes.Length, player.ip);
+                //foreach (Player player in playersOnline)
+                //{
+                //    udpListener.Send(messageBytes, messageBytes.Length, player.ip);
 
-    //            //}
-                
-    //            lastRepPacket = null;
-    //            Debug.Log("Client processed a packet successfully");
-    //        }
+                //}
 
-    //        yield return new WaitForSeconds(1.0f / interval);
-    //    }
-    //}
+                lastRepPacket = null;
+                Debug.Log("Client processed a packet successfully");
+            }
+
+            yield return new WaitForSeconds(1.0f / interval);
+        }
+    }
 
     private IEnumerator SendPacket(float interval)
     {
         while (true)
         {
-            Packet pack = new Packet(username, Status.Movement, clientPlayer.transform.position, "I have moved");
+            Packet pack = new Packet(username, Status.Movement, clientPlayer.transform.position, clientPlayer.transform.rotation, "I have moved");
             byte[] messageBytes = SerializePacket(pack);  //Encoding.UTF8.GetBytes(responseMessage);
             udpClient.Send(messageBytes, messageBytes.Length, serverEndPoint);
             yield return new WaitForSeconds(1.0f / interval);
@@ -185,8 +199,8 @@ public class Client : MonoBehaviour
             // Handle the received response from the server.
             HandleResponse(responsePacket);
             //string receivedString = Encoding.ASCII.GetString(receivedBytes);
-                //RepPacket repPacket = JsonConvert.DeserializeObject<RepPacket>(receivedString);
-                //if (repPacket.status == Status.Replication)
+            //RepPacket repPacket = JsonConvert.DeserializeObject<RepPacket>(receivedString);
+            //if (repPacket.status == Status.Replication)
             lastRepPacket = responsePacket;
             // Continue listening for more responses.
             //udpClient.BeginReceive(ReceiveCallback, null);
@@ -202,8 +216,11 @@ public class Client : MonoBehaviour
         // Handle the received response from the server.
         if (responsePacket.status != Status.Idle)
             Debug.Log("Received response from server: " + responsePacket.message);
-        //if (responsePacket.status != Status.Replication)
-            //Debug.Log("Received Replication: " + responsePacket.message);
+        if (responsePacket.status != Status.Replication)
+        {
+            Debug.Log("Received Replication: " + responsePacket.message);
+
+        }
     }
 
     private void OnDestroy()
@@ -234,7 +251,7 @@ public class Client : MonoBehaviour
     {
         string message = "Bye from the client!";
         //byte[] messageBytes = Encoding.UTF8.GetBytes(message);
-        Packet pack = new Packet(username, Status.Disconnect, new Vector3(0, 1, 0), message);
+        Packet pack = new Packet(username, Status.Disconnect, new Vector3(0, 1, 0), Quaternion.identity, message);
 
 
         byte[] messageBytes = SerializePacket(pack);  //Encoding.UTF8.GetBytes(responseMessage);
