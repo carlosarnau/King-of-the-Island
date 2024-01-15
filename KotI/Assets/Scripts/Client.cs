@@ -5,8 +5,10 @@ using System.Net.Sockets;
 using System.Net;
 using System.Text;
 using UnityEngine;
+using Random = UnityEngine.Random;
 //using Newtonsoft.Json;
 using static Server;
+using Unity.VisualScripting.Antlr3.Runtime;
 
 public class Client : MonoBehaviour
 {
@@ -18,6 +20,7 @@ public class Client : MonoBehaviour
     public GameObject clientPlayer;
     public Packet lastRepPacket;
     public List<Player> players = new List<Player>();
+    public List<GameObject> playerObjects = new List<GameObject>();
 
     private void Awake()
     {
@@ -43,7 +46,8 @@ public class Client : MonoBehaviour
             serverEndPoint = new IPEndPoint(IPAddress.Parse(serverIP), serverPort);
 
             // Send a message to the server.
-            string message = "Hello from the client!";
+            Vector3 col = new Vector3(Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f));
+            string message = JsonUtility.ToJson(col);
             //byte[] messageBytes = Encoding.UTF8.GetBytes(message);
             Packet pack = new Packet(username, Status.Connect, new Vector3(0, 1, 0), message);
 
@@ -52,7 +56,7 @@ public class Client : MonoBehaviour
 
             udpClient.Send(messageBytes, messageBytes.Length, serverEndPoint);
 
-
+            clientPlayer.GetComponentInChildren<Renderer>().material.color = new Color(col.x, col.y, col.z);
 
             Debug.Log("UDP client connected to " + serverIP + ":" + serverPort);
 
@@ -226,5 +230,16 @@ public class Client : MonoBehaviour
         return JsonUtility.FromJson<Packet>(json);
     }
 
+    public void OnApplicationQuit()
+    {
+        string message = "Bye from the client!";
+        //byte[] messageBytes = Encoding.UTF8.GetBytes(message);
+        Packet pack = new Packet(username, Status.Disconnect, new Vector3(0, 1, 0), message);
+
+
+        byte[] messageBytes = SerializePacket(pack);  //Encoding.UTF8.GetBytes(responseMessage);
+
+        udpClient.Send(messageBytes, messageBytes.Length, serverEndPoint);
+    }
 
 }

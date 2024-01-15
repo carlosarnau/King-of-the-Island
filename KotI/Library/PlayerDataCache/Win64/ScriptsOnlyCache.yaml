@@ -110,13 +110,13 @@ ScriptsOnlyBuild:
     - Class: 108
       Script: {instanceID: 0}
     - Class: 114
-      Script: {instanceID: 2282}
+      Script: {instanceID: 2186}
     - Class: 114
-      Script: {instanceID: 5686}
+      Script: {instanceID: 2284}
     - Class: 114
-      Script: {instanceID: 6996}
+      Script: {instanceID: 5688}
     - Class: 114
-      Script: {instanceID: 8054}
+      Script: {instanceID: 6998}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 143
@@ -151,31 +151,31 @@ ScriptsOnlyBuild:
     - Class: 114
       Script: {instanceID: 1598}
     - Class: 114
-      Script: {instanceID: 2214}
+      Script: {instanceID: 2216}
     - Class: 114
-      Script: {instanceID: 2564}
+      Script: {instanceID: 2566}
     - Class: 114
-      Script: {instanceID: 2640}
+      Script: {instanceID: 2642}
     - Class: 114
-      Script: {instanceID: 2844}
+      Script: {instanceID: 2846}
     - Class: 114
-      Script: {instanceID: 2890}
+      Script: {instanceID: 2892}
     - Class: 114
-      Script: {instanceID: 3138}
+      Script: {instanceID: 3140}
     - Class: 114
-      Script: {instanceID: 4160}
+      Script: {instanceID: 4162}
     - Class: 114
-      Script: {instanceID: 4422}
+      Script: {instanceID: 4424}
     - Class: 114
-      Script: {instanceID: 5030}
+      Script: {instanceID: 5032}
     - Class: 114
-      Script: {instanceID: 5150}
+      Script: {instanceID: 5152}
     - Class: 114
-      Script: {instanceID: 5400}
+      Script: {instanceID: 5402}
     - Class: 114
-      Script: {instanceID: 5716}
+      Script: {instanceID: 5718}
     - Class: 114
-      Script: {instanceID: 6202}
+      Script: {instanceID: 6204}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 128
@@ -289,6 +289,12 @@ ScriptsOnlyBuild:
     assemblyName: Unity.VisualScripting.Core
     namespaceName: Unity.VisualScripting
     className: UnityOnTriggerEnterMessageListener
+  - hash:
+      serializedVersion: 2
+      Hash: edcd4af6c2804c72db0f34759c30d1dd
+    assemblyName: Assembly-CSharp
+    namespaceName: 
+    className: Client
   - hash:
       serializedVersion: 2
       Hash: 63815508dfd6cf329d5c593ac8e76888
@@ -1191,7 +1197,7 @@ ScriptsOnlyBuild:
     className: Dropdown
   - hash:
       serializedVersion: 2
-      Hash: 2db8d35e78313c136ac9b5dcede22dfa
+      Hash: aefd1491fef9e625996e1fecbc11e744
     assemblyName: Assembly-CSharp
     namespaceName: 
     className: Server
@@ -1327,12 +1333,6 @@ ScriptsOnlyBuild:
     assemblyName: Unity.VisualScripting.Core
     namespaceName: Unity.VisualScripting
     className: UnityOnSliderValueChangedMessageListener
-  - hash:
-      serializedVersion: 2
-      Hash: 8f7525bd1ecfae0a8c97d32592fe28a8
-    assemblyName: Assembly-CSharp
-    namespaceName: 
-    className: Client
   platform: 19
   scenePathNames:
   - Assets/Scenes/Lobby.unity

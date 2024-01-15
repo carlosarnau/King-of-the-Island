@@ -5,6 +5,8 @@ using System.Net.Sockets;
 using System.Net;
 using System.Text;
 using UnityEngine;
+using Random = UnityEngine.Random;
+using static Server;
 //using Newtonsoft.Json;
 
 public class Server : MonoBehaviour
@@ -19,10 +21,7 @@ public class Server : MonoBehaviour
     public List<Player> playersOnline = new List<Player>();
     public GameObject playerFromClient;
     public Packet lastPacket;
-    public GameObject player1;
-    public GameObject player2;
-    public GameObject player3;
-    public GameObject player4;
+    public List<GameObject> playerObjects;
 
     [Serializable]
     public class Player
@@ -39,6 +38,7 @@ public class Server : MonoBehaviour
             //y = position_.y;
             //z = position_.z;
             ip = ip_;
+            
         }
     }
     [Serializable]
@@ -151,19 +151,12 @@ public class Server : MonoBehaviour
         {
             Debug.LogError("Error setting up UDP server: " + e.Message);
         }*/
+        
 
         if (lastPacket != null)
             ProcessPacket(lastPacket);
 
         //TODO update world
-        if (player1 != null)
-            player1.gameObject.transform.position = playersOnline[0].position;
-        if (player2 != null)
-            player2.gameObject.transform.position = playersOnline[1].position;
-        if (player3 != null)
-            player3.gameObject.transform.position = playersOnline[2].position;
-        if (player4 != null)
-            player4.gameObject.transform.position = playersOnline[3].position;
 
 
     }
@@ -196,36 +189,46 @@ public class Server : MonoBehaviour
 
     public void ProcessPacket(Packet pack)
     {
-        
-        
-            if (pack.status == Status.Connect)
-            {
-                Player newPlayer = new Player(pack.user, GameObject.Find("PlayerFromClient"), new Vector3(0, 0, 0), pack.ip);
-                playersOnline.Add(newPlayer);
 
-                if (playersOnline[0] != null && player1 == null)
-                {
-                    player1 = Instantiate(playerPrefab);
-                    player1.GetComponentInChildren<Renderer>().material.color = Color.red;
-                }
-                if (playersOnline[1] != null && player2 == null)
-                {
-                    player2 = Instantiate(playerPrefab);
-                    player2.GetComponentInChildren<Renderer>().material.color = Color.green;
-                }
-                if (playersOnline[2] != null && player3 == null)
-                {
-                    player3 = Instantiate(playerPrefab);
-                    player3.GetComponentInChildren<Renderer>().material.color = Color.blue;
-                }
-                if (playersOnline[3] != null && player4 == null)
-                {
-                    player4 = Instantiate(playerPrefab);
-                    player4.GetComponentInChildren<Renderer>().material.color = Color.yellow;
+
+        if (pack.status == Status.Connect)
+        {
+            Player newPlayer = new Player(pack.user, GameObject.Find("PlayerFromClient"), new Vector3(0, 0, 0), pack.ip);
+            playersOnline.Add(newPlayer);
+            if (playersOnline.Count > 0 && playerObjects.Count < playersOnline.Count)
+            {
+                GameObject temp = new GameObject("Player " + playersOnline.Count+1);
+
+                temp = Instantiate(playerPrefab);
+                Vector3 col = JsonUtility.FromJson<Vector3>(pack.message);
+                temp.GetComponentInChildren<Renderer>().material.color = new Color(col.x, col.y, col.z);
+                playerObjects.Add(temp);
+                //playerObjects.Add(new GameObject)
+
             }
-            //YES i know, i know. Whatever man it is what it is, in life sometimes you gotta get your hands dirty
+                
             Debug.Log("Player joined:" + newPlayer.userID + newPlayer.ip + pack.ip);
+        }
+
+        else if (pack.status == Status.Disconnect)
+        {
+            for (int i = 0; i < playersOnline.Count; i++)
+            {
+                if (playersOnline[i].userID == pack.user)
+                {
+                    Destroy(playerObjects[i]);
+                    playerObjects.RemoveAt(i);
+                    playersOnline.Remove(playersOnline[i]);
+                }
+                //if ()
             }
+                
+                
+            
+            Debug.Log("Player " + pack.user + " disconnected");
+        }
+            
+            
         // Uncomment this block when you have the implementation for chat
         //if (lastPacket.status == Status.Chat)
         //{
@@ -234,14 +237,12 @@ public class Server : MonoBehaviour
 
         if (pack.status == Status.Movement)
         {
-            if (pack.user == playersOnline[0].userID && player1 != null)
-                player1.transform.position = pack.position;
-            if (pack.user == playersOnline[1].userID && player2 != null)
-                player2.transform.position = pack.position;
-            if (pack.user == playersOnline[2].userID && player3 != null)
-                player3.transform.position = pack.position;
-            if (pack.user == playersOnline[3].userID && player4 != null)
-                player4.transform.position = pack.position;
+                for (int i = 0; i < playersOnline.Count; i++)
+                {
+                    if (pack.user == playersOnline[i].userID && playerObjects[i] != null)
+                    playerObjects[i].transform.position = new Vector3(pack.position.x, pack.position.y, pack.position.z);
+
+                }
 
         }
 
