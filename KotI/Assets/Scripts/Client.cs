@@ -81,18 +81,27 @@ public class Client : MonoBehaviour
 
             udpClient.Send(messageBytes, messageBytes.Length, serverEndPoint);
         }
+
+        //PROCESS REPLICATION
         if (lastRepPacket != null)
         {
             if (players.Count != lastRepPacket.playerList.Count)
-                Debug.Log("Client detected a Player has connected or disconnected");
+            {
+                Debug.Log("Client detected a Player has connected");
+                players.Clear();
+                foreach (Player player in lastRepPacket.playerList)
+                {
+                    players.Add(player);
+
+                }
+            }
             //TODO foreach Object add object to objectsList
+            foreach (Player player in lastRepPacket.playerList)
+            {
 
+            }
 
-            //foreach (Player player in playersOnline)
-            //{
-            //    udpListener.Send(messageBytes, messageBytes.Length, player.ip);
-
-            //}
+            
 
             lastRepPacket = null;
             Debug.Log("Client processed a packet successfully");
@@ -171,7 +180,7 @@ public class Client : MonoBehaviour
             Packet responsePacket = DeserializePacket(receivedBytes);
             // Handle the received response from the server.
             HandleResponse(responsePacket);
-            string receivedString = Encoding.ASCII.GetString(receivedBytes);
+            //string receivedString = Encoding.ASCII.GetString(receivedBytes);
                 //RepPacket repPacket = JsonConvert.DeserializeObject<RepPacket>(receivedString);
                 //if (repPacket.status == Status.Replication)
             lastRepPacket = responsePacket;
