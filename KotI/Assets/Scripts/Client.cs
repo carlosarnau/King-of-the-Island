@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using UnityEngine;
+using System.Linq;
 //using Newtonsoft.Json;
 using static Server;
 using Random = UnityEngine.Random;
@@ -16,6 +17,7 @@ public class Client : MonoBehaviour
     public UdpClient udpClient;
     public IPEndPoint serverEndPoint;
     public GameObject clientPlayer;
+    public GameObject playerPrefab;
     public Packet lastRepPacket;
     public List<Player> players = new List<Player>();
     public List<GameObject> playerObjects = new List<GameObject>();
@@ -89,50 +91,35 @@ public class Client : MonoBehaviour
         //PROCESS REPLICATION
         if (lastRepPacket != null)
         {
-            players.Clear();
-            playerObjects.Clear();
+            //CONNECT A PLAYER
+            if (lastRepPacket.playerList.Count != players.Count + 1)
+            {
+                for (int i = 0; i < lastRepPacket.playerList.Count; i++)
+                {
+                    if (lastRepPacket.playerList[i].userID != username && !players.Exists(player => player.userID == lastRepPacket.playerList[i].userID))
+                    {
+                        AddNewPlayer(lastRepPacket.playerList[i]);
+                        Debug.Log("añadido el player " + lastRepPacket.playerList[i].userID);
+                    }
+                }
+            }
+
             if (players.Count > 0)
             {
-                Debug.Log("Client detected a Player has connected");
-                foreach (Player player in lastRepPacket.playerList)
+                for(int i = 0; i < lastRepPacket.playerList.Count; i++)
                 {
-                    players.Add(player);
-                    GameObject temp = new GameObject(player.userID);
-
-                    playerObjects.Add(temp);
+                    if (lastRepPacket.playerList[i].userID != username)
+                    {
+                        players[i-1].position = lastRepPacket.playerList[i].position;
+                        playerObjects[i-1].transform.position = lastRepPacket.playerList[i].position;
+                    }
                 }
             }
             
-            for (int i = 0; i < lastRepPacket.playerList.Count; i++)
-            {
-                players.Add(lastRepPacket.playerList[i]);
-                //if ()
-            }
-            //TODO foreach Object add object to objectsList
-            foreach (Player player in lastRepPacket.playerList)
-            {
-
-            }
-            //UPDATE PLAYER POSITIONS AND ROTATIONS
-            for (int i = 0; i < players.Count; i++)
-            {
-                playerObjects[i].transform.SetPositionAndRotation(players[i].position, players[i].rotation);
-                //if ()
-            }
-
 
             lastRepPacket = null;
-            Debug.Log("Client processed a packet successfully");
+            //Debug.Log("Client processed a packet successfully");
         }
-
-        //if (Input.GetKeyDown(KeyCode.C))
-        //{
-
-        //    Packet pack = new Packet("Manolo", Status.Chat, GameObject.Find("Player").transform.position, "I have chatted");
-        //    byte[] messageBytes = SerializePacket(pack);  //Encoding.UTF8.GetBytes(responseMessage);
-
-        //    udpClient.Send(messageBytes, messageBytes.Length, serverEndPoint);
-        //}
     }
 
     private IEnumerator WaitForMessages(float interval)
@@ -215,12 +202,11 @@ public class Client : MonoBehaviour
     {
         // Handle the received response from the server.
         if (responsePacket.status != Status.Idle)
-            Debug.Log("Received response from server: " + responsePacket.message);
-        if (responsePacket.status != Status.Replication)
-        {
-            Debug.Log("Received Replication: " + responsePacket.message);
-
-        }
+            //Debug.Log("Received response from server: " + responsePacket.message);
+            if (responsePacket.status != Status.Replication)
+            {
+                //Debug.Log("Received Replication: " + responsePacket.message);
+            }
     }
 
     private void OnDestroy()
@@ -257,6 +243,14 @@ public class Client : MonoBehaviour
         byte[] messageBytes = SerializePacket(pack);  //Encoding.UTF8.GetBytes(responseMessage);
 
         udpClient.Send(messageBytes, messageBytes.Length, serverEndPoint);
+    }
+
+    public void AddNewPlayer(Player player)
+    {
+        players.Add(player);
+        GameObject temp = new GameObject("Player " + player.userID);
+        temp = Instantiate(playerPrefab);
+        playerObjects.Add(temp);
     }
 
 }
