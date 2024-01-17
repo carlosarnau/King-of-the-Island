@@ -245,6 +245,7 @@ public class Server : MonoBehaviour
                     //playerObjects[i].transform.position = new Vector3(pack.position.x, pack.position.y, pack.position.z);
                     playerObjects[i].transform.SetPositionAndRotation(new Vector3(pack.position.x, pack.position.y, pack.position.z), pack.rotation);
                     playersOnline[i].position = new Vector3(pack.position.x, pack.position.y, pack.position.z);
+                    playersOnline[i].rotation = new Quaternion(pack.rotation.x, pack.rotation.y, pack.rotation.z, pack.rotation.w);
                 }
             }
 

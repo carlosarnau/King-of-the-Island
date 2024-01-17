@@ -20,7 +20,7 @@ public class Client : MonoBehaviour
     public GameObject playerPrefab;
     public Packet lastRepPacket;
     public List<Player> players = new List<Player>();
-    public List<GameObject> playerObjects = new List<GameObject>();
+    public List<GameObject> playersObjects = new List<GameObject>();
 
     private void Awake()
     {
@@ -92,7 +92,7 @@ public class Client : MonoBehaviour
         if (lastRepPacket != null)
         {
             //CONNECT A PLAYER
-            if (lastRepPacket.playerList.Count != players.Count + 1)
+            if (lastRepPacket.playerList.Count > players.Count + 1)
             {
                 for (int i = 0; i < lastRepPacket.playerList.Count; i++)
                 {
@@ -106,16 +106,38 @@ public class Client : MonoBehaviour
 
             if (players.Count > 0)
             {
-                for(int i = 0; i < lastRepPacket.playerList.Count; i++)
+                int index = 0;
+
+                for (int i = 0; i < lastRepPacket.playerList.Count; i++)
                 {
                     if (lastRepPacket.playerList[i].userID != username)
                     {
-                        players[i-1].position = lastRepPacket.playerList[i].position;
-                        playerObjects[i-1].transform.position = lastRepPacket.playerList[i].position;
+                        players[i-index].position = lastRepPacket.playerList[i].position;
+                        playersObjects[i-index].transform.position = lastRepPacket.playerList[i].position;
+                        playersObjects[i-index].transform.rotation = lastRepPacket.playerList[i].rotation;
+                    }
+                    else 
+                    {
+                        index = 1;
                     }
                 }
             }
-            
+
+            if (lastRepPacket.playerList.Count > 0 && lastRepPacket.playerList.Count < players.Count + 1)
+            {
+                int playerIndex = 0;
+                for (int i = 0; i < players.Count; i++)
+                {
+                    if (!lastRepPacket.playerList.Exists(player => player.userID == players[i].userID))
+                    {
+                        playerIndex = i;
+                    }
+                }
+                Debug.Log(playerIndex);
+                players.RemoveAt(playerIndex);
+                Destroy(playersObjects[playerIndex]);
+                playersObjects.RemoveAt(playerIndex);
+            }
 
             lastRepPacket = null;
             //Debug.Log("Client processed a packet successfully");
@@ -250,7 +272,6 @@ public class Client : MonoBehaviour
         players.Add(player);
         GameObject temp = new GameObject("Player " + player.userID);
         temp = Instantiate(playerPrefab);
-        playerObjects.Add(temp);
+        playersObjects.Add(temp);
     }
-
 }
