@@ -32,13 +32,10 @@ public class Client : MonoBehaviour
 
         if (PlayerPrefs.GetString("username") != null)
             username = PlayerPrefs.GetString("username");
-
     }
 
     private void Start()
     {
-
-
         try
         {
             // Create a UDP client.
@@ -82,7 +79,6 @@ public class Client : MonoBehaviour
             //byte[] messageBytes = Encoding.UTF8.GetBytes(message);
             Packet pack = new Packet(username, Status.Connect, new Vector3(0, 1, 0), Quaternion.identity, message);
 
-
             byte[] messageBytes = SerializePacket(pack);  //Encoding.UTF8.GetBytes(responseMessage);
 
             udpClient.Send(messageBytes, messageBytes.Length, serverEndPoint);
@@ -104,7 +100,7 @@ public class Client : MonoBehaviour
                 }
             }
 
-            if (players.Count > 0)
+            if (players.Count > 0 && players.Count == lastRepPacket.playerList.Count - 1)
             {
                 int index = 0;
 
@@ -138,7 +134,6 @@ public class Client : MonoBehaviour
                 Destroy(playersObjects[playerIndex]);
                 playersObjects.RemoveAt(playerIndex);
             }
-
             lastRepPacket = null;
             //Debug.Log("Client processed a packet successfully");
         }
@@ -171,7 +166,6 @@ public class Client : MonoBehaviour
                     Debug.Log("Client detected a Player has connected or disconnected");
                 //TODO foreach Object add object to objectsList
 
-
                 //foreach (Player player in playersOnline)
                 //{
                 //    udpListener.Send(messageBytes, messageBytes.Length, player.ip);
@@ -181,7 +175,6 @@ public class Client : MonoBehaviour
                 lastRepPacket = null;
                 Debug.Log("Client processed a packet successfully");
             }
-
             yield return new WaitForSeconds(1.0f / interval);
         }
     }
@@ -190,9 +183,16 @@ public class Client : MonoBehaviour
     {
         while (true)
         {
+            // Adding a ranadom delay between 0 and 0.1 seconds to simulate Jitter
+            yield return new WaitForSeconds(Random.Range(0, 0.8f));
+
+            // Simulate the packet loss by randomly deciding whether to send the packet
+            if (Random.value < 0.9f) // Adjustable (in this case 0.9 represents a 90% chance of sending the package)
+            { 
             Packet pack = new Packet(username, Status.Movement, clientPlayer.transform.position, clientPlayer.transform.rotation, "I have moved");
             byte[] messageBytes = SerializePacket(pack);  //Encoding.UTF8.GetBytes(responseMessage);
             udpClient.Send(messageBytes, messageBytes.Length, serverEndPoint);
+            }
             yield return new WaitForSeconds(1.0f / interval);
         }
     }
@@ -203,16 +203,21 @@ public class Client : MonoBehaviour
         {
             IPEndPoint serverEndPoint = new IPEndPoint(IPAddress.Any, serverPort);
             byte[] receivedBytes = udpClient.EndReceive(ar, ref serverEndPoint);
-            //string responseMessage = Encoding.UTF8.GetString(receivedBytes);
-            Packet responsePacket = DeserializePacket(receivedBytes);
-            // Handle the received response from the server.
-            HandleResponse(responsePacket);
-            //string receivedString = Encoding.ASCII.GetString(receivedBytes);
-            //RepPacket repPacket = JsonConvert.DeserializeObject<RepPacket>(receivedString);
-            //if (repPacket.status == Status.Replication)
-            lastRepPacket = responsePacket;
-            // Continue listening for more responses.
-            //udpClient.BeginReceive(ReceiveCallback, null);
+
+            // Simulate the packet loss by randomly deciding whether to process the received packet
+            if (Random.value < 0.8f) // Adjustable(in this case 0.9 represents a 90 % chance of sending the package)
+            {
+                //string responseMessage = Encoding.UTF8.GetString(receivedBytes);
+                Packet responsePacket = DeserializePacket(receivedBytes);
+                // Handle the received response from the server.
+                HandleResponse(responsePacket);
+                //string receivedString = Encoding.ASCII.GetString(receivedBytes);
+                //RepPacket repPacket = JsonConvert.DeserializeObject<RepPacket>(receivedString);
+                //if (repPacket.status == Status.Replication)
+                lastRepPacket = responsePacket;
+                // Continue listening for more responses.
+                //udpClient.BeginReceive(ReceiveCallback, null);
+            }
         }
         catch (SocketException e)
         {

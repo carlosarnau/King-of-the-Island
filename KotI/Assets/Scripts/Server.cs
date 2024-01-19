@@ -14,7 +14,6 @@ public class Server : MonoBehaviour
     public UdpClient udpListener;
     public GameObject playerPrefab;
 
-
     public List<Player> playersOnline = new List<Player>();
     public GameObject playerFromClient;
     public Packet lastPacket;
@@ -26,18 +25,19 @@ public class Server : MonoBehaviour
         public string userID;
         public Vector3 position;
         public Quaternion rotation;
+        public int life;
         //public float x, y, z;
         public IPEndPoint ip;
-        public Player(string userID_, GameObject userGO_, Vector3 position_, Quaternion rotation_, IPEndPoint ip_)
+        public Player(string userID_, GameObject userGO_, Vector3 position_, Quaternion rotation_, int life_, IPEndPoint ip_)
         {
             userID = userID_;
             position = position_;
             rotation = rotation_;
+            life = life_;
             //x = position_.x;
             //y = position_.y;
             //z = position_.z;
             ip = ip_;
-
         }
     }
     [Serializable]
@@ -153,20 +153,16 @@ public class Server : MonoBehaviour
             Debug.LogError("Error setting up UDP server: " + e.Message);
         }*/
 
-
         if (lastPacket != null)
             ProcessPacket(lastPacket);
 
         //TODO update world
-
-
     }
 
     public IEnumerator SendReplication(float interval)
     {
         while (true)
         {
-
             if (playersOnline.Count > 0)
             {
                 Packet pack = new Packet("Server", Status.Replication, new Vector3(0, 0, 0), Quaternion.identity, "Replication");
@@ -190,11 +186,9 @@ public class Server : MonoBehaviour
 
     public void ProcessPacket(Packet pack)
     {
-
-
         if (pack.status == Status.Connect)
         {
-            Player newPlayer = new Player(pack.user, GameObject.Find("PlayerFromClient"), new Vector3(0, 0, 0), Quaternion.identity, pack.ip);
+            Player newPlayer = new Player(pack.user, GameObject.Find("PlayerFromClient"), new Vector3(0, 0, 0), Quaternion.identity, 100, pack.ip);
             playersOnline.Add(newPlayer);
             if (playersOnline.Count > 0 && playerObjects.Count < playersOnline.Count)
             {
@@ -205,9 +199,7 @@ public class Server : MonoBehaviour
                 temp.GetComponentInChildren<Renderer>().material.color = new Color(col.x, col.y, col.z);
                 playerObjects.Add(temp);
                 //playerObjects.Add(new GameObject)
-
             }
-
             Debug.Log("Player joined:" + newPlayer.userID + newPlayer.ip + pack.ip);
         }
 
@@ -223,12 +215,8 @@ public class Server : MonoBehaviour
                 }
                 //if ()
             }
-
-
-
             Debug.Log("Player " + pack.user + " disconnected");
         }
-
 
         // Uncomment this block when you have the implementation for chat
         //if (lastPacket.status == Status.Chat)
@@ -248,7 +236,6 @@ public class Server : MonoBehaviour
                     playersOnline[i].rotation = new Quaternion(pack.rotation.x, pack.rotation.y, pack.rotation.z, pack.rotation.w);
                 }
             }
-
         }
 
         lastPacket = null;
@@ -258,7 +245,6 @@ public class Server : MonoBehaviour
 
     public void ReceiveCallback(IAsyncResult ar)
     {
-
         try
         {
             IPEndPoint remoteEndPoint = new IPEndPoint(IPAddress.Any, port);
@@ -276,8 +262,6 @@ public class Server : MonoBehaviour
         {
             Debug.LogError("UDP receive error: " + e.Message);
         }
-
-
     }
 
     public void HandleMessage(Packet message, IPEndPoint remoteEndPoint)
@@ -320,21 +304,15 @@ public class Server : MonoBehaviour
         }
     }
 
-
-
     public byte[] SerializePacket(Packet toSend)
     {
         string json = JsonUtility.ToJson(toSend);
         return System.Text.Encoding.UTF8.GetBytes(json);
     }
 
-
-
-
     public Packet DeserializePacket(byte[] toReceive)
     {
         string json = System.Text.Encoding.UTF8.GetString(toReceive);
         return JsonUtility.FromJson<Packet>(json);
     }
-
 }
