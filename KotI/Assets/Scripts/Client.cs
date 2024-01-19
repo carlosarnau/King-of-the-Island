@@ -22,8 +22,8 @@ public class Client : MonoBehaviour
     public List<Player> players = new List<Player>();
     public List<GameObject> playersObjects = new List<GameObject>();
     private Vector3 predictedPosition;
-    public float reconciliationThreshold = 5.0f; // Adjust as needed
-    public float interpolationTime = 5.0f; // Adjust as needed
+    public float reconciliationThreshold = 0.5f; // Adjust as needed
+    public float interpolationTime = 0.5f; // Adjust as needed
     public float moveSpeed = 5.0f; // Adjust as needed
 
     private void Awake()
@@ -85,11 +85,7 @@ public class Client : MonoBehaviour
             byte[] messageBytes = SerializePacket(pack);  //Encoding.UTF8.GetBytes(responseMessage);
 
             udpClient.Send(messageBytes, messageBytes.Length, serverEndPoint);
-        }
 
-        // Client-side prediction
-        if (Input.GetKey(KeyCode.W))
-        {
             predictedPosition += clientPlayer.transform.forward * Time.deltaTime * moveSpeed;
             clientPlayer.transform.position = predictedPosition;
         }
@@ -194,10 +190,10 @@ public class Client : MonoBehaviour
         while (true)
         {
             // Adding a ranadom delay between 0 and 0.1 seconds to simulate Jitter
-            yield return new WaitForSeconds(Random.Range(0, 0.8f));
+            yield return new WaitForSeconds(Random.Range(0, 0.1f));
 
             // Simulate the packet loss by randomly deciding whether to send the packet
-            if (Random.value < 0.9f) // Adjustable (in this case 0.9 represents a 90% chance of sending the package)
+            if (Random.value < 0.5f) // Adjustable (in this case 0.9 represents a 90% chance of sending the package)
             { 
             Packet pack = new Packet(username, Status.Movement, clientPlayer.transform.position, clientPlayer.transform.rotation, "I have moved");
             byte[] messageBytes = SerializePacket(pack);  //Encoding.UTF8.GetBytes(responseMessage);
@@ -232,7 +228,7 @@ public class Client : MonoBehaviour
             byte[] receivedBytes = udpClient.EndReceive(ar, ref serverEndPoint);
 
             // Simulate the packet loss by randomly deciding whether to process the received packet
-            if (Random.value < 0.8f) // Adjustable(in this case 0.9 represents a 90 % chance of sending the package)
+            if (Random.value < 0.5f) // Adjustable(in this case 0.9 represents a 90 % chance of sending the package)
             {
                 Packet responsePacket = DeserializePacket(receivedBytes);
                 HandleResponse(responsePacket);
