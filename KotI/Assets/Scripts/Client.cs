@@ -21,6 +21,10 @@ public class Client : MonoBehaviour
     public Packet lastRepPacket;
     public List<Player> players = new List<Player>();
     public List<GameObject> playersObjects = new List<GameObject>();
+    private Vector3 predictedPosition;
+    public float reconciliationThreshold = 5.0f; // Adjust as needed
+    public float interpolationTime = 5.0f; // Adjust as needed
+    public float moveSpeed = 5.0f; // Adjust as needed
 
     private void Awake()
     {
@@ -81,6 +85,13 @@ public class Client : MonoBehaviour
             byte[] messageBytes = SerializePacket(pack);  //Encoding.UTF8.GetBytes(responseMessage);
 
             udpClient.Send(messageBytes, messageBytes.Length, serverEndPoint);
+        }
+
+        // Client-side prediction
+        if (Input.GetKey(KeyCode.W))
+        {
+            predictedPosition += clientPlayer.transform.forward * Time.deltaTime * moveSpeed;
+            clientPlayer.transform.position = predictedPosition;
         }
 
         //PROCESS REPLICATION
@@ -196,6 +207,23 @@ public class Client : MonoBehaviour
         }
     }
 
+    private IEnumerator InterpolatePosition(Vector3 targetPosition)
+    {
+        float elapsedTime = 0f;
+        Vector3 startPosition = predictedPosition;
+
+        while (elapsedTime < interpolationTime)
+        {
+            clientPlayer.transform.position = Vector3.Lerp(startPosition, targetPosition, elapsedTime / interpolationTime);
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+
+        // Set the final position
+        clientPlayer.transform.position = targetPosition;
+        predictedPosition = targetPosition;
+    }
+
     private void ReceiveCallback(IAsyncResult ar)
     {
         try
@@ -234,6 +262,20 @@ public class Client : MonoBehaviour
             {
                 //Debug.Log("Received Replication: " + responsePacket.message);
             }
+
+        if (responsePacket.status == Status.Movement)
+        {
+            Vector3 serverPosition = responsePacket.position;
+
+            // Perform reconciliation
+            float distance = Vector3.Distance(predictedPosition, serverPosition);
+
+            if (distance > reconciliationThreshold)
+            {
+                // Adjust the local player's position to match the server's position
+                StartCoroutine(InterpolatePosition(serverPosition));
+            }
+        }
     }
 
     private void OnDestroy()
