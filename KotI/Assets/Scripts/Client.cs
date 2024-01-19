@@ -50,7 +50,6 @@ public class Client : MonoBehaviour
             //byte[] messageBytes = Encoding.UTF8.GetBytes(message);
             Packet pack = new Packet(username, Status.Connect, new Vector3(0, 1, 0), Quaternion.identity, message);
 
-
             byte[] messageBytes = SerializePacket(pack);  //Encoding.UTF8.GetBytes(responseMessage);
 
             udpClient.Send(messageBytes, messageBytes.Length, serverEndPoint);
@@ -207,14 +206,15 @@ public class Client : MonoBehaviour
             // Simulate the packet loss by randomly deciding whether to process the received packet
             if (Random.value < 0.8f) // Adjustable(in this case 0.9 represents a 90 % chance of sending the package)
             {
-                //string responseMessage = Encoding.UTF8.GetString(receivedBytes);
                 Packet responsePacket = DeserializePacket(receivedBytes);
-                // Handle the received response from the server.
                 HandleResponse(responsePacket);
+                lastRepPacket = responsePacket;
+
+                //string responseMessage = Encoding.UTF8.GetString(receivedBytes);
+                // Handle the received response from the server.
                 //string receivedString = Encoding.ASCII.GetString(receivedBytes);
                 //RepPacket repPacket = JsonConvert.DeserializeObject<RepPacket>(receivedString);
                 //if (repPacket.status == Status.Replication)
-                lastRepPacket = responsePacket;
                 // Continue listening for more responses.
                 //udpClient.BeginReceive(ReceiveCallback, null);
             }
@@ -263,20 +263,17 @@ public class Client : MonoBehaviour
     public void OnApplicationQuit()
     {
         string message = "Bye from the client!";
-        //byte[] messageBytes = Encoding.UTF8.GetBytes(message);
         Packet pack = new Packet(username, Status.Disconnect, new Vector3(0, 1, 0), Quaternion.identity, message);
-
-
         byte[] messageBytes = SerializePacket(pack);  //Encoding.UTF8.GetBytes(responseMessage);
-
         udpClient.Send(messageBytes, messageBytes.Length, serverEndPoint);
+        //byte[] messageBytes = Encoding.UTF8.GetBytes(message);
     }
 
     public void AddNewPlayer(Player player)
     {
         players.Add(player);
-        GameObject temp = new GameObject("Player " + player.userID);
-        temp = Instantiate(playerPrefab);
+        GameObject temp = Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
+        temp.name = "Player " + player.userID;
         playersObjects.Add(temp);
     }
 }

@@ -26,18 +26,19 @@ public class Server : MonoBehaviour
         public Vector3 position;
         public Quaternion rotation;
         public int life;
-        //public float x, y, z;
         public IPEndPoint ip;
+        //public float x, y, z;
+
         public Player(string userID_, GameObject userGO_, Vector3 position_, Quaternion rotation_, int life_, IPEndPoint ip_)
         {
             userID = userID_;
             position = position_;
             rotation = rotation_;
             life = life_;
+            ip = ip_;
             //x = position_.x;
             //y = position_.y;
             //z = position_.z;
-            ip = ip_;
         }
     }
     [Serializable]
@@ -116,10 +117,8 @@ public class Server : MonoBehaviour
         {
             Debug.LogError("Error setting up UDP server: " + e.Message);
         }
-
         StartCoroutine(WaitForMessages());
         StartCoroutine(SendReplication(60.0f));
-
     }
 
     private IEnumerator WaitForMessages()
@@ -151,7 +150,8 @@ public class Server : MonoBehaviour
         catch (SocketException e)
         {
             Debug.LogError("Error setting up UDP server: " + e.Message);
-        }*/
+        }
+        */
 
         if (lastPacket != null)
             ProcessPacket(lastPacket);
@@ -171,7 +171,7 @@ public class Server : MonoBehaviour
                     pack.playerList.Add(player);
                 }
                 //string messageString = JsonConvert.SerializeObject(pack/*, new JsonSerializerSettings() { ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore }*/);  //Encoding.UTF8.GetBytes(responseMessage); <<  get cancer
-                byte[] messageBytes = SerializePacket(pack);
+                var messageBytes = SerializePacket(pack);
 
                 foreach (Player player in playersOnline)
                 {
@@ -192,9 +192,7 @@ public class Server : MonoBehaviour
             playersOnline.Add(newPlayer);
             if (playersOnline.Count > 0 && playerObjects.Count < playersOnline.Count)
             {
-                GameObject temp = new GameObject("Player " + playersOnline.Count + 1);
-
-                temp = Instantiate(playerPrefab);
+                GameObject temp = Instantiate(playerPrefab);
                 Vector3 col = JsonUtility.FromJson<Vector3>(pack.message);
                 temp.GetComponentInChildren<Renderer>().material.color = new Color(col.x, col.y, col.z);
                 playerObjects.Add(temp);
