@@ -16,8 +16,9 @@ public class Client : MonoBehaviour
     public string username = "Unknown";
     public UdpClient udpClient;
     public IPEndPoint serverEndPoint;
-    public GameObject clientPlayer;
+    public GameObject clientPrefab;
     public GameObject playerPrefab;
+    public GameObject clientPlayer;
     public Packet lastRepPacket;
     public List<Player> players = new List<Player>();
     public List<GameObject> playersObjects = new List<GameObject>();
@@ -29,7 +30,13 @@ public class Client : MonoBehaviour
     private void Awake()
     {
         if ((PlayerPrefs.GetInt("isServer")) != 0)
+        {
             this.gameObject.SetActive(false);
+        }
+        else
+        {
+            clientPlayer = Instantiate(clientPrefab, Vector3.zero, Quaternion.identity);
+        }
 
         if (PlayerPrefs.GetString("ipAddress") != null)
             serverIP = PlayerPrefs.GetString("ipAddress");

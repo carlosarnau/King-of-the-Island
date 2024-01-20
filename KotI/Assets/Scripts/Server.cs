@@ -15,7 +15,6 @@ public class Server : MonoBehaviour
     public GameObject playerPrefab;
 
     public List<Player> playersOnline = new List<Player>();
-    public GameObject playerFromClient;
     public Packet lastPacket;
     public List<GameObject> playerObjects;
 
@@ -103,7 +102,6 @@ public class Server : MonoBehaviour
 
     private void Start()
     {
-        playerFromClient = GameObject.Find("PlayerFromClient");
         try
         {
             // Create a UDP listener on the specified port.
