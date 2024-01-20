@@ -35,6 +35,10 @@ public class ThirdPersonMovement : MonoBehaviour
                 speed = 15f;
                 _animator.SetInteger("AnimationType", 2);
                 break;
+            case PlayerState.Attacking:
+                speed = 4f;
+                _animator.SetInteger("AnimationType", 3);
+                break;
             default:
                 break;
         }
@@ -60,11 +64,16 @@ public class ThirdPersonMovement : MonoBehaviour
 
             Vector3 moveDir = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
             controller.Move(moveDir.normalized * speed * Time.deltaTime);
+
+           
+        }
+        else if (Input.GetKeyDown(KeyCode.L))
+        {
+            state = PlayerState.Attacking;
         }
         else
         {
             state = PlayerState.Idle;
-            
         }
 
         camera.transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z);
@@ -74,6 +83,7 @@ public class ThirdPersonMovement : MonoBehaviour
     {
         Idle,
         Walking,
-        Running
+        Running,
+        Attacking
     }
 }
