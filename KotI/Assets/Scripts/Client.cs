@@ -269,6 +269,7 @@ public class Client : MonoBehaviour
         if (responsePacket.status == Status.Movement)
         {
             Vector3 serverPosition = responsePacket.position;
+            // players[i].playerState = responsePacket.playerState;
 
             // Perform reconciliation
             float distance = Vector3.Distance(predictedPosition, serverPosition);

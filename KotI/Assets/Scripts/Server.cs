@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using UnityEngine;
+using static ThirdPersonMovement;
 //using Newtonsoft.Json;
 
 public class Server : MonoBehaviour
@@ -25,6 +26,7 @@ public class Server : MonoBehaviour
         public Vector3 position;
         public Quaternion rotation;
         public int life;
+        public PlayerState playerState;
         public IPEndPoint ip;
         //public float x, y, z;
 
@@ -230,6 +232,8 @@ public class Server : MonoBehaviour
                     playerObjects[i].transform.SetPositionAndRotation(new Vector3(pack.position.x, pack.position.y, pack.position.z), pack.rotation);
                     playersOnline[i].position = new Vector3(pack.position.x, pack.position.y, pack.position.z);
                     playersOnline[i].rotation = new Quaternion(pack.rotation.x, pack.rotation.y, pack.rotation.z, pack.rotation.w);
+
+                    // playersOnline[i].playerState = pack.playerState;
                 }
             }
         }
