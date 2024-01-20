@@ -32,7 +32,7 @@ public class ThirdPersonMovement : MonoBehaviour
                 _animator.SetInteger("AnimationType", 1);
                 break;
             case PlayerState.Running:
-                speed = 10f;
+                speed = 15f;
                 _animator.SetInteger("AnimationType", 2);
                 break;
             default:
