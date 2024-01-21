@@ -19,6 +19,8 @@ public class Client : MonoBehaviour
     public GameObject clientPrefab;
     public GameObject playerPrefab;
     public GameObject clientPlayer;
+    public GameObject serverCamera;
+    public GameObject clientCamera;
     public Packet lastRepPacket;
     public List<Player> players = new List<Player>();
     public List<GameObject> playersObjects = new List<GameObject>();
@@ -31,11 +33,15 @@ public class Client : MonoBehaviour
     {
         if ((PlayerPrefs.GetInt("isServer")) != 0)
         {
+
             this.gameObject.SetActive(false);
+            serverCamera.SetActive(false);
         }
         else
         {
-            clientPlayer = Instantiate(clientPrefab, Vector3.zero, Quaternion.identity);
+            clientPlayer = Instantiate(clientPrefab, new Vector3(34.63f, 15.5f, 27.51f), Quaternion.identity);
+            clientPlayer.name = "Client Player";
+            clientCamera.SetActive(false);
         }
 
         if (PlayerPrefs.GetString("ipAddress") != null)
@@ -200,7 +206,7 @@ public class Client : MonoBehaviour
             yield return new WaitForSeconds(Random.Range(0, 0.1f));
 
             // Simulate the packet loss by randomly deciding whether to send the packet
-            if (Random.value < 0.5f) // Adjustable (in this case 0.9 represents a 90% chance of sending the package)
+            //if (Random.value < 0.5f) // Adjustable (in this case 0.9 represents a 90% chance of sending the package)
             { 
             Packet pack = new Packet(username, Status.Movement, clientPlayer.transform.position, clientPlayer.transform.rotation, "I have moved");
             byte[] messageBytes = SerializePacket(pack);  //Encoding.UTF8.GetBytes(responseMessage);
