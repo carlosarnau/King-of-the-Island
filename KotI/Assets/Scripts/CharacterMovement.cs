@@ -28,8 +28,9 @@ public class CharacterMovement : MonoBehaviour
     public LayerMask groundMask;
 
     bool isGrounded;
+    bool isAttacking;
 
-    Vector3 velocity;
+    public Vector3 velocity;
 
     public float turnSmoothTime = 0.1f;
     float turnSmoothVel;
@@ -64,6 +65,12 @@ public class CharacterMovement : MonoBehaviour
 
             case PlayerState.Attacking:
                 animator.SetInteger("AnimationType", 3);
+                if(animator.GetCurrentAnimatorStateInfo(0).normalizedTime > 0.7f)
+                {
+                    isAttacking = false;
+                    playerState = PlayerState.Idle;
+                    animator.speed = 1f;
+                }
                 break;
 
             default:
@@ -74,7 +81,7 @@ public class CharacterMovement : MonoBehaviour
 
         if(isGrounded && velocity.y < 0)
         {
-            velocity.y = 0;
+            velocity.y = -2;
         }
 
         float horizontal = Input.GetAxisRaw("Horizontal");
@@ -82,7 +89,14 @@ public class CharacterMovement : MonoBehaviour
 
         Vector3 direction = new Vector3 (horizontal, 0f, vertical).normalized;
 
-        if(direction.magnitude >= 0.1f)
+        if (Input.GetMouseButton(0) && !isAttacking)
+        {
+            isAttacking = true;
+            animator.speed = 2f;
+            playerState = PlayerState.Attacking;
+        }
+
+        if (direction.magnitude >= 0.1f)
         {
             float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + cam.eulerAngles.y;
             float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref turnSmoothVel, turnSmoothTime);
@@ -94,16 +108,16 @@ public class CharacterMovement : MonoBehaviour
 
             controller.Move(moveDirection.normalized * speed * Time.deltaTime);
 
-            if (Input.GetKey(KeyCode.LeftShift))
+            if (Input.GetKey(KeyCode.LeftShift) && !isAttacking)
             {
                 playerState = PlayerState.Running;
             }
-            else
+            else if(!isAttacking)
             {
                 playerState = PlayerState.Walking;
             }
         }
-        else if(isGrounded)
+        else if(isGrounded && !isAttacking)
         {
             playerState= PlayerState.Idle;
             velocity.x = 0;
@@ -117,7 +131,8 @@ public class CharacterMovement : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
         {
-            playerState = PlayerState.Jumping;
+            if(!isAttacking)
+                playerState = PlayerState.Jumping;
             Jump();
         }
 
