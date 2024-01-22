@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using UnityEngine;
+using static CharacterMovement;
 //using Newtonsoft.Json;
 using static Server;
 using Random = UnityEngine.Random;
@@ -64,7 +65,7 @@ public class Client : MonoBehaviour
             Vector3 col = new Vector3(Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f));
             string message = JsonUtility.ToJson(col);
             //byte[] messageBytes = Encoding.UTF8.GetBytes(message);
-            Packet pack = new Packet(username, Status.Connect, new Vector3(0, 1, 0), new Vector3(0, 0, 0), Quaternion.identity, message);
+            Packet pack = new Packet(username, Status.Connect, new Vector3(0, 1, 0), new Vector3(0, 0, 0), Quaternion.identity, /*PlayerState.Idle,*/ message);
 
             byte[] messageBytes = SerializePacket(pack);  //Encoding.UTF8.GetBytes(responseMessage);
 
@@ -92,7 +93,7 @@ public class Client : MonoBehaviour
         {
             string message = "Hello from the client!";
             //byte[] messageBytes = Encoding.UTF8.GetBytes(message);
-            Packet pack = new Packet(username, Status.Connect, new Vector3(0, 1, 0), new Vector3(0, 0, 0), Quaternion.identity, message);
+            Packet pack = new Packet(username, Status.Connect, new Vector3(0, 1, 0), new Vector3(0, 0, 0), Quaternion.identity, /*PlayerState.Idle,*/ message);
 
             byte[] messageBytes = SerializePacket(pack);  //Encoding.UTF8.GetBytes(responseMessage);
 
@@ -209,7 +210,7 @@ public class Client : MonoBehaviour
             // Simulate the packet loss by randomly deciding whether to send the packet
             //if (Random.value < 0.5f) // Adjustable (in this case 0.9 represents a 90% chance of sending the package)
             {
-                Packet pack = new Packet(username, Status.Movement, clientPlayer.transform.position, clientPlayer.GetComponent<Rigidbody>().velocity, clientPlayer.transform.rotation, "I have moved");
+                Packet pack = new Packet(username, Status.Movement, clientPlayer.transform.position, clientPlayer.GetComponent<Rigidbody>().velocity, clientPlayer.transform.rotation, /*PlayerState.Idle,*/ "I have moved");
                 byte[] messageBytes = SerializePacket(pack);  //Encoding.UTF8.GetBytes(responseMessage);
                 udpClient.Send(messageBytes, messageBytes.Length, serverEndPoint);
             }
@@ -316,7 +317,7 @@ public class Client : MonoBehaviour
     public void OnApplicationQuit()
     {
         string message = "Bye from the client!";
-        Packet pack = new Packet(username, Status.Disconnect, new Vector3(0, 1, 0), new Vector3(0, 0, 0), Quaternion.identity, message);
+        Packet pack = new Packet(username, Status.Disconnect, new Vector3(0, 1, 0), new Vector3(0, 0, 0), Quaternion.identity, /*PlayerState.Idle,*/ message);
         byte[] messageBytes = SerializePacket(pack);  //Encoding.UTF8.GetBytes(responseMessage);
         udpClient.Send(messageBytes, messageBytes.Length, serverEndPoint);
         //byte[] messageBytes = Encoding.UTF8.GetBytes(message);

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using UnityEngine;
+using static CharacterMovement;
 //using Newtonsoft.Json;
 
 public class Server : MonoBehaviour
@@ -28,16 +29,18 @@ public class Server : MonoBehaviour
         public Vector3 vel;
         public Quaternion rotation;
         public int life;
+        // public PlayerState playerstate;
         public IPEndPoint ip;
         //public float x, y, z;
 
-        public Player(string userID_, GameObject userGO_, Vector3 position_, Vector3 vel_, Quaternion rotation_, int life_, IPEndPoint ip_)
+        public Player(string userID_, GameObject userGO_, Vector3 position_, Vector3 vel_, Quaternion rotation_, int life_, /*PlayerState playerstate,*/ IPEndPoint ip_)
         {
             userID = userID_;
             position = position_;
             vel = vel_;
             rotation = rotation_;
             life = life_;
+            // playerstate = PlayerState.Idle;
             ip = ip_;
             //x = position_.x;
             //y = position_.y;
@@ -52,18 +55,20 @@ public class Server : MonoBehaviour
         public Vector3 position;
         public Vector3 vel;
         public Quaternion rotation;
+        // public PlayerState playerState;
         public string message;
         public IPEndPoint ip;
         public List<Player> playerList;
         public List<Object> objectList;
         public DateTime time;
 
-        public Packet(String user, Status status, Vector3 position, Vector3 vel,  Quaternion rotation_, string message)
+        public Packet(String user, Status status, Vector3 position, Vector3 vel,  Quaternion rotation_, /*PlayerState playerstate,*/ string message)
         {
             this.user = user;
             this.status = status;
             this.position = position;
             this.rotation = rotation_;
+            // playerstate = PlayerState.Idle;
             this.message = message;
             playerList = new List<Player>();
             objectList = new List<Object>();
@@ -173,7 +178,7 @@ public class Server : MonoBehaviour
         {
             if (playersOnline.Count > 0)
             {
-                Packet pack = new Packet("Server", Status.Replication, new Vector3(0, 0, 0), new Vector3(0, 0, 0), Quaternion.identity, "Replication");
+                Packet pack = new Packet("Server", Status.Replication, new Vector3(0, 0, 0), new Vector3(0, 0, 0), Quaternion.identity, /*PlayerState.Idle,*/ "Replication");
                 foreach (Player player in playersOnline)
                 {
                     pack.playerList.Add(player);
@@ -196,7 +201,7 @@ public class Server : MonoBehaviour
     {
         if (pack.status == Status.Connect)
         {
-            Player newPlayer = new Player(pack.user, GameObject.Find("PlayerFromClient"), new Vector3(0, 0, 0), new Vector3(0, 0, 0), Quaternion.identity, 100, pack.ip);
+            Player newPlayer = new Player(pack.user, GameObject.Find("PlayerFromClient"), new Vector3(0, 0, 0), new Vector3(0, 0, 0), Quaternion.identity, 100, /*PlayerState.Idle,*/ pack.ip);
             playersOnline.Add(newPlayer);
             if (playersOnline.Count > 0 && playerObjects.Count < playersOnline.Count)
             {
