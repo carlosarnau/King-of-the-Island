@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using UnityEngine;
-using System.Linq;
 //using Newtonsoft.Json;
 using static Server;
 using Random = UnityEngine.Random;
@@ -40,7 +39,7 @@ public class Client : MonoBehaviour
         else
         {
             clientPlayer = Instantiate(clientPrefab, new Vector3(34.63f, 15.5f, 27.51f), Quaternion.identity);
-            clientPlayer.name = "Client Player";
+            clientPlayer.name = "Player";
             clientCamera.SetActive(false);
         }
 
@@ -65,7 +64,7 @@ public class Client : MonoBehaviour
             Vector3 col = new Vector3(Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f));
             string message = JsonUtility.ToJson(col);
             //byte[] messageBytes = Encoding.UTF8.GetBytes(message);
-            Packet pack = new Packet(username, Status.Connect, new Vector3(0, 1, 0), Quaternion.identity, message);
+            Packet pack = new Packet(username, Status.Connect, new Vector3(0, 1, 0), new Vector3(0, 0, 0), Quaternion.identity, message);
 
             byte[] messageBytes = SerializePacket(pack);  //Encoding.UTF8.GetBytes(responseMessage);
 
@@ -93,7 +92,7 @@ public class Client : MonoBehaviour
         {
             string message = "Hello from the client!";
             //byte[] messageBytes = Encoding.UTF8.GetBytes(message);
-            Packet pack = new Packet(username, Status.Connect, new Vector3(0, 1, 0), Quaternion.identity, message);
+            Packet pack = new Packet(username, Status.Connect, new Vector3(0, 1, 0), new Vector3(0, 0, 0), Quaternion.identity, message);
 
             byte[] messageBytes = SerializePacket(pack);  //Encoding.UTF8.GetBytes(responseMessage);
 
@@ -127,11 +126,13 @@ public class Client : MonoBehaviour
                 {
                     if (lastRepPacket.playerList[i].userID != username)
                     {
-                        players[i-index].position = lastRepPacket.playerList[i].position;
-                        playersObjects[i-index].transform.position = lastRepPacket.playerList[i].position;
-                        playersObjects[i-index].transform.rotation = lastRepPacket.playerList[i].rotation;
+                        players[i - index].position = lastRepPacket.playerList[i].position; 
+                        playersObjects[i - index].transform.position = lastRepPacket.playerList[i].position;
+                        playersObjects[i - index].transform.rotation = lastRepPacket.playerList[i].rotation;
+                        playersObjects[i - index].GetComponent<Rigidbody>().velocity = lastRepPacket.playerList[i].vel;
+
                     }
-                    else 
+                    else
                     {
                         index = 1;
                     }
@@ -207,10 +208,10 @@ public class Client : MonoBehaviour
 
             // Simulate the packet loss by randomly deciding whether to send the packet
             //if (Random.value < 0.5f) // Adjustable (in this case 0.9 represents a 90% chance of sending the package)
-            { 
-            Packet pack = new Packet(username, Status.Movement, clientPlayer.transform.position, clientPlayer.transform.rotation, "I have moved");
-            byte[] messageBytes = SerializePacket(pack);  //Encoding.UTF8.GetBytes(responseMessage);
-            udpClient.Send(messageBytes, messageBytes.Length, serverEndPoint);
+            {
+                Packet pack = new Packet(username, Status.Movement, clientPlayer.transform.position, clientPlayer.GetComponent<Rigidbody>().velocity, clientPlayer.transform.rotation, "I have moved");
+                byte[] messageBytes = SerializePacket(pack);  //Encoding.UTF8.GetBytes(responseMessage);
+                udpClient.Send(messageBytes, messageBytes.Length, serverEndPoint);
             }
             yield return new WaitForSeconds(1.0f / interval);
         }
@@ -237,12 +238,12 @@ public class Client : MonoBehaviour
     {
         try
         {
-            IPEndPoint serverEndPoint = new IPEndPoint(IPAddress.Any, serverPort);
-            byte[] receivedBytes = udpClient.EndReceive(ar, ref serverEndPoint);
 
             // Simulate the packet loss by randomly deciding whether to process the received packet
             if (Random.value < 0.5f) // Adjustable(in this case 0.9 represents a 90 % chance of sending the package)
             {
+                IPEndPoint serverEndPoint = new IPEndPoint(IPAddress.Any, serverPort);
+                byte[] receivedBytes = udpClient.EndReceive(ar, ref serverEndPoint);
                 Packet responsePacket = DeserializePacket(receivedBytes);
                 HandleResponse(responsePacket);
                 lastRepPacket = responsePacket;
@@ -315,7 +316,7 @@ public class Client : MonoBehaviour
     public void OnApplicationQuit()
     {
         string message = "Bye from the client!";
-        Packet pack = new Packet(username, Status.Disconnect, new Vector3(0, 1, 0), Quaternion.identity, message);
+        Packet pack = new Packet(username, Status.Disconnect, new Vector3(0, 1, 0), new Vector3(0, 0, 0), Quaternion.identity, message);
         byte[] messageBytes = SerializePacket(pack);  //Encoding.UTF8.GetBytes(responseMessage);
         udpClient.Send(messageBytes, messageBytes.Length, serverEndPoint);
         //byte[] messageBytes = Encoding.UTF8.GetBytes(message);

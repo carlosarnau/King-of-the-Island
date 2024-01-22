@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using UnityEngine;
-using static ThirdPersonMovement;
 //using Newtonsoft.Json;
 
 public class Server : MonoBehaviour
@@ -16,7 +15,9 @@ public class Server : MonoBehaviour
     public GameObject playerPrefab;
 
     public List<Player> playersOnline = new List<Player>();
-    public Packet lastPacket;
+
+    public List<Packet> receivedPackets;
+
     public List<GameObject> playerObjects;
 
     [Serializable]
@@ -24,16 +25,17 @@ public class Server : MonoBehaviour
     {
         public string userID;
         public Vector3 position;
+        public Vector3 vel;
         public Quaternion rotation;
         public int life;
-        public PlayerState playerState;
         public IPEndPoint ip;
         //public float x, y, z;
 
-        public Player(string userID_, GameObject userGO_, Vector3 position_, Quaternion rotation_, int life_, IPEndPoint ip_)
+        public Player(string userID_, GameObject userGO_, Vector3 position_, Vector3 vel_, Quaternion rotation_, int life_, IPEndPoint ip_)
         {
             userID = userID_;
             position = position_;
+            vel = vel_;
             rotation = rotation_;
             life = life_;
             ip = ip_;
@@ -48,6 +50,7 @@ public class Server : MonoBehaviour
         public string user;
         public Status status;
         public Vector3 position;
+        public Vector3 vel;
         public Quaternion rotation;
         public string message;
         public IPEndPoint ip;
@@ -55,7 +58,7 @@ public class Server : MonoBehaviour
         public List<Object> objectList;
         public DateTime time;
 
-        public Packet(String user, Status status, Vector3 position, Quaternion rotation_, string message)
+        public Packet(String user, Status status, Vector3 position, Vector3 vel,  Quaternion rotation_, string message)
         {
             this.user = user;
             this.status = status;
@@ -65,6 +68,7 @@ public class Server : MonoBehaviour
             playerList = new List<Player>();
             objectList = new List<Object>();
             time = DateTime.UtcNow;
+            this.vel = vel;
             //this.ip = ip;
         }
     }
@@ -118,7 +122,7 @@ public class Server : MonoBehaviour
             Debug.LogError("Error setting up UDP server: " + e.Message);
         }
         StartCoroutine(WaitForMessages());
-        StartCoroutine(SendReplication(60.0f));
+        StartCoroutine(SendReplication(30.0f));
     }
 
     private IEnumerator WaitForMessages()
@@ -152,10 +156,14 @@ public class Server : MonoBehaviour
             Debug.LogError("Error setting up UDP server: " + e.Message);
         }
         */
-
-        if (lastPacket != null)
-            ProcessPacket(lastPacket);
-
+        foreach (Packet lastPacket in receivedPackets)
+        {
+            if (lastPacket != null)
+            {
+                ProcessPacket(lastPacket);
+            }
+        }
+        receivedPackets.Clear();
         //TODO update world
     }
 
@@ -165,7 +173,7 @@ public class Server : MonoBehaviour
         {
             if (playersOnline.Count > 0)
             {
-                Packet pack = new Packet("Server", Status.Replication, new Vector3(0, 0, 0), Quaternion.identity, "Replication");
+                Packet pack = new Packet("Server", Status.Replication, new Vector3(0, 0, 0), new Vector3(0, 0, 0), Quaternion.identity, "Replication");
                 foreach (Player player in playersOnline)
                 {
                     pack.playerList.Add(player);
@@ -188,7 +196,7 @@ public class Server : MonoBehaviour
     {
         if (pack.status == Status.Connect)
         {
-            Player newPlayer = new Player(pack.user, GameObject.Find("PlayerFromClient"), new Vector3(0, 0, 0), Quaternion.identity, 100, pack.ip);
+            Player newPlayer = new Player(pack.user, GameObject.Find("PlayerFromClient"), new Vector3(0, 0, 0), new Vector3(0, 0, 0), Quaternion.identity, 100, pack.ip);
             playersOnline.Add(newPlayer);
             if (playersOnline.Count > 0 && playerObjects.Count < playersOnline.Count)
             {
@@ -238,8 +246,6 @@ public class Server : MonoBehaviour
             }
         }
 
-        lastPacket = null;
-
         // Wait for the next frame before processing the next packet
     }
 
@@ -268,9 +274,9 @@ public class Server : MonoBehaviour
     {
         // Handle the received message here. You can send a response back to the client if needed.
         ////Debug.Log("Received message from " + remoteEndPoint + ": " + message.message);
-
-        lastPacket = message;
-        lastPacket.ip = remoteEndPoint;
+        Packet temp = message;
+        temp.ip = remoteEndPoint;
+        receivedPackets.Add(temp);
 
         string messageToSend = "";
 
