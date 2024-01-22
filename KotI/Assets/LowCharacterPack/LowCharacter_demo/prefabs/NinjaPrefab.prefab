@@ -196,23 +196,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   walkSpeed: 70
   sprintSpeed: 150
-  slideSpeed: 0
-  wallrunSpeed: 0
-  climbSpeed: 0
-  vaultSpeed: 0
   airMinSpeed: 1
   speedIncreaseMultiplier: 1
   slopeIncreaseMultiplier: 0
   groundDrag: 1
   jumpForce: 20
   jumpCooldown: 1
-  airMultiplier: 1
-  crouchSpeed: 0
-  crouchYScale: 0
+  airMultiplier: 0
   jumpKey: 32
   sprintKey: 304
-  crouchKey: 306
-  playerHeight: 0.25
+  playerHeight: 0.1
   whatIsGround:
     serializedVersion: 2
     m_Bits: 1024
@@ -220,16 +213,9 @@ MonoBehaviour:
   maxSlopeAngle: 0
   orientation: {fileID: 0}
   state: 0
-  sliding: 0
-  crouching: 0
-  wallrunning: 0
-  climbing: 0
-  vaulting: 0
   freeze: 0
   unlimited: 0
   restricted: 0
-  text_speed: {fileID: 0}
-  text_mode: {fileID: 0}
 --- !u!1 &278752737343883120
 GameObject:
   m_ObjectHideFlags: 0
