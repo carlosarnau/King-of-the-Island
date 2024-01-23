@@ -186,7 +186,7 @@ public class Server : MonoBehaviour
                 {
                     udpListener.Send(messageBytes, messageBytes.Length, player.ip);
                 }
-                //Debug.Log("Sent replication " + JsonUtility.ToJson(pack));
+                Debug.Log("Sent replication " + JsonUtility.ToJson(pack));
             }
             //TODO foreach Object add object to objectsList
             yield return new WaitForSeconds(1.0f / interval);

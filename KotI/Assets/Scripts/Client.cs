@@ -106,7 +106,7 @@ public class Client : MonoBehaviour
         //PROCESS REPLICATION
         if (lastRepPacket != null)
         {
-            
+            Debug.Log(JsonUtility.ToJson(lastRepPacket));
             //CONNECT A PLAYER
             if (lastRepPacket.playerList.Count > players.Count + 1)
             {
@@ -132,6 +132,13 @@ public class Client : MonoBehaviour
                         playersObjects[i - index].transform.position = lastRepPacket.playerList[i].position;
                         playersObjects[i - index].transform.rotation = lastRepPacket.playerList[i].rotation;
                         playersObjects[i - index].GetComponent<Rigidbody>().velocity = lastRepPacket.playerList[i].vel;
+                        players[i - index].state = lastRepPacket.playerList[i].state;
+
+                        EnemyController.EnemyState enemyState;
+                        if (Enum.TryParse(players[i - index].state.ToString(), out enemyState))
+                        {
+                            playersObjects[i - index].GetComponent<EnemyController>().state = enemyState;
+                        }
 
                     }
                     else
@@ -157,7 +164,7 @@ public class Client : MonoBehaviour
                 playersObjects.RemoveAt(playerIndex);
             }
             lastRepPacket = null;
-            //Debug.Log("Client processed a packet successfully");
+            Debug.Log("Client processed a packet successfully");
         }
     }
 
@@ -215,7 +222,7 @@ public class Client : MonoBehaviour
                 byte[] messageBytes = SerializePacket(pack);  //Encoding.UTF8.GetBytes(responseMessage);
                 udpClient.Send(messageBytes, messageBytes.Length, serverEndPoint);
 
-                Debug.Log(JsonUtility.ToJson(pack));
+                //Debug.Log(JsonUtility.ToJson(pack));
 
             }
             yield return new WaitForSeconds(1.0f / interval);
@@ -245,7 +252,7 @@ public class Client : MonoBehaviour
         {
 
             // Simulate the packet loss by randomly deciding whether to process the received packet
-            if (Random.value < 0.5f) // Adjustable(in this case 0.9 represents a 90 % chance of sending the package)
+            //if (Random.value < 0.5f) // Adjustable(in this case 0.9 represents a 90 % chance of sending the package)
             {
                 IPEndPoint serverEndPoint = new IPEndPoint(IPAddress.Any, serverPort);
                 byte[] receivedBytes = udpClient.EndReceive(ar, ref serverEndPoint);
