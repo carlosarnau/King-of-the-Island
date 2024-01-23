@@ -282,14 +282,7 @@ MonoBehaviour:
   port: 12345
   playerPrefab: {fileID: 109172321315190402, guid: be3d68e0cec93ca40b19726f1a3e3ee8, type: 3}
   playersOnline: []
-  lastPacket:
-    user: 
-    status: 0
-    position: {x: 0, y: 0, z: 0}
-    rotation: {x: 0, y: 0, z: 0, w: 0}
-    message: 
-    playerList: []
-    objectList: []
+  receivedPackets: []
   playerObjects: []
 --- !u!4 &733550035
 Transform:
@@ -347,6 +340,7 @@ MonoBehaviour:
     user: 
     status: 0
     position: {x: 0, y: 0, z: 0}
+    vel: {x: 0, y: 0, z: 0}
     rotation: {x: 0, y: 0, z: 0, w: 0}
     message: 
     playerList: []

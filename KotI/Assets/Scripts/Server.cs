@@ -28,23 +28,19 @@ public class Server : MonoBehaviour
         public Vector3 position;
         public Vector3 vel;
         public Quaternion rotation;
+        public Color color;
         public int life;
-        // public PlayerState playerstate;
         public IPEndPoint ip;
-        //public float x, y, z;
 
-        public Player(string userID_, GameObject userGO_, Vector3 position_, Vector3 vel_, Quaternion rotation_, int life_, /*PlayerState playerstate,*/ IPEndPoint ip_)
+        public Player(string userID_, GameObject userGO_, Vector3 position_, Vector3 vel_, Quaternion rotation_, Color color_, int life_, IPEndPoint ip_)
         {
             userID = userID_;
             position = position_;
             vel = vel_;
             rotation = rotation_;
+            color = color_;
             life = life_;
-            // playerstate = PlayerState.Idle;
             ip = ip_;
-            //x = position_.x;
-            //y = position_.y;
-            //z = position_.z;
         }
     }
     [Serializable]
@@ -55,20 +51,18 @@ public class Server : MonoBehaviour
         public Vector3 position;
         public Vector3 vel;
         public Quaternion rotation;
-        // public PlayerState playerState;
         public string message;
         public IPEndPoint ip;
         public List<Player> playerList;
         public List<Object> objectList;
         public DateTime time;
 
-        public Packet(String user, Status status, Vector3 position, Vector3 vel,  Quaternion rotation_, /*PlayerState playerstate,*/ string message)
+        public Packet(String user, Status status, Vector3 position, Vector3 vel,  Quaternion rotation_, string message)
         {
             this.user = user;
             this.status = status;
             this.position = position;
             this.rotation = rotation_;
-            // playerstate = PlayerState.Idle;
             this.message = message;
             playerList = new List<Player>();
             objectList = new List<Object>();
@@ -201,13 +195,14 @@ public class Server : MonoBehaviour
     {
         if (pack.status == Status.Connect)
         {
-            Player newPlayer = new Player(pack.user, GameObject.Find("PlayerFromClient"), new Vector3(0, 0, 0), new Vector3(0, 0, 0), Quaternion.identity, 100, /*PlayerState.Idle,*/ pack.ip);
+            Vector3 col = JsonUtility.FromJson<Vector3>(pack.message);
+
+            Player newPlayer = new Player(pack.user, GameObject.Find("PlayerFromClient"), new Vector3(0, 0, 0), new Vector3(0, 0, 0), Quaternion.identity, new Vector4(col.x, col.y, col.z, 1), 100, /*PlayerState.Idle,*/ pack.ip);
             playersOnline.Add(newPlayer);
             if (playersOnline.Count > 0 && playerObjects.Count < playersOnline.Count)
             {
                 GameObject temp = Instantiate(playerPrefab);
-                Vector3 col = JsonUtility.FromJson<Vector3>(pack.message);
-                temp.GetComponentInChildren<Renderer>().material.color = new Color(col.x, col.y, col.z);
+                temp.GetComponentInChildren<SkinnedMeshRenderer>().materials[1].SetColor("_Color", new Color(col.x, col.y, col.z));
                 playerObjects.Add(temp);
                 //playerObjects.Add(new GameObject)
             }

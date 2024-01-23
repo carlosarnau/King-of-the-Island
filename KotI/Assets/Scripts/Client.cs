@@ -35,13 +35,13 @@ public class Client : MonoBehaviour
         {
 
             this.gameObject.SetActive(false);
-            serverCamera.SetActive(false);
+            //serverCamera.SetActive(false);
         }
         else
         {
             clientPlayer = Instantiate(clientPrefab, new Vector3(34.63f, 15.5f, 27.51f), Quaternion.identity);
             clientPlayer.name = "Player";
-            clientCamera.SetActive(false);
+            //clientCamera.SetActive(false);
         }
 
         if (PlayerPrefs.GetString("ipAddress") != null)
@@ -49,6 +49,8 @@ public class Client : MonoBehaviour
 
         if (PlayerPrefs.GetString("username") != null)
             username = PlayerPrefs.GetString("username");
+
+        GameObject.Find("Player Mesh").GetComponent<SkinnedMeshRenderer>().materials[1].SetColor("_Color", new Color(PlayerPrefs.GetFloat("ColorR"), PlayerPrefs.GetFloat("ColorG"), PlayerPrefs.GetFloat("ColorB")));
     }
 
     private void Start()
@@ -62,7 +64,7 @@ public class Client : MonoBehaviour
             serverEndPoint = new IPEndPoint(IPAddress.Parse(serverIP), serverPort);
 
             // Send a message to the server.
-            Vector3 col = new Vector3(Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f), Random.Range(0.0f, 1.0f));
+            Vector3 col = new Vector3(PlayerPrefs.GetFloat("ColorR"), PlayerPrefs.GetFloat("ColorG"), PlayerPrefs.GetFloat("ColorB"));
             string message = JsonUtility.ToJson(col);
             //byte[] messageBytes = Encoding.UTF8.GetBytes(message);
             Packet pack = new Packet(username, Status.Connect, new Vector3(0, 1, 0), new Vector3(0, 0, 0), Quaternion.identity, /*PlayerState.Idle,*/ message);
@@ -70,8 +72,6 @@ public class Client : MonoBehaviour
             byte[] messageBytes = SerializePacket(pack);  //Encoding.UTF8.GetBytes(responseMessage);
 
             udpClient.Send(messageBytes, messageBytes.Length, serverEndPoint);
-
-            clientPlayer.GetComponentInChildren<Renderer>().material.color = new Color(col.x, col.y, col.z);
 
             Debug.Log("UDP client connected to " + serverIP + ":" + serverPort);
 
@@ -210,7 +210,7 @@ public class Client : MonoBehaviour
             // Simulate the packet loss by randomly deciding whether to send the packet
             //if (Random.value < 0.5f) // Adjustable (in this case 0.9 represents a 90% chance of sending the package)
             {
-                Packet pack = new Packet(username, Status.Movement, clientPlayer.transform.position, clientPlayer.GetComponent<Rigidbody>().velocity, clientPlayer.transform.rotation, /*PlayerState.Idle,*/ "I have moved");
+                Packet pack = new Packet(username, Status.Movement, clientPlayer.transform.position, clientPlayer.GetComponent<CharacterMovement>().velocity, clientPlayer.transform.rotation, /*PlayerState.Idle,*/ "I have moved");
                 byte[] messageBytes = SerializePacket(pack);  //Encoding.UTF8.GetBytes(responseMessage);
                 udpClient.Send(messageBytes, messageBytes.Length, serverEndPoint);
             }
@@ -328,6 +328,7 @@ public class Client : MonoBehaviour
         players.Add(player);
         GameObject temp = Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
         temp.name = "Player " + player.userID;
+        temp.GetComponentInChildren<SkinnedMeshRenderer>().materials[1].SetColor("_Color", new Color(player.color.r, player.color.g, player.color.b, player.color.a));
         playersObjects.Add(temp);
     }
 }

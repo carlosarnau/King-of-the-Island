@@ -9,10 +9,12 @@ public class ChangeScene : MonoBehaviour
     public InputField usernameInput;
     public InputField ipInput;
     public Toggle isServerButton;
+    public MenuController _menu;
 
     public void Start()
     {
         PlayerPrefs.SetString("ClientStatus", ClientStatus.Menu.ToString());
+        _menu = GameObject.Find("MenuController").GetComponent<MenuController>();
     }
 
     public void SceneChange(string sceneName)
@@ -28,6 +30,10 @@ public class ChangeScene : MonoBehaviour
         PlayerPrefs.SetString("ipAddress", ip);
         PlayerPrefs.SetInt("isServer", isServer);
         PlayerPrefs.SetString("ClientStatus", ClientStatus.Ingame.ToString());
+        PlayerPrefs.SetFloat("ColorR", _menu.colorR.value);
+        PlayerPrefs.SetFloat("ColorG", _menu.colorG.value);
+        PlayerPrefs.SetFloat("ColorB", _menu.colorB.value);
+
         //Debug.Log(PlayerPrefs.GetString("username") + PlayerPrefs.GetString("ipAddress") + PlayerPrefs.GetInt("isServer"));
         SceneManager.LoadScene(sceneName);
 
