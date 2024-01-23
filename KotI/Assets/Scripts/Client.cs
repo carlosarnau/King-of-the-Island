@@ -106,6 +106,7 @@ public class Client : MonoBehaviour
         //PROCESS REPLICATION
         if (lastRepPacket != null)
         {
+            
             //CONNECT A PLAYER
             if (lastRepPacket.playerList.Count > players.Count + 1)
             {
@@ -210,9 +211,12 @@ public class Client : MonoBehaviour
             // Simulate the packet loss by randomly deciding whether to send the packet
             //if (Random.value < 0.5f) // Adjustable (in this case 0.9 represents a 90% chance of sending the package)
             {
-                Packet pack = new Packet(username, Status.Movement, clientPlayer.transform.position, clientPlayer.GetComponent<CharacterMovement>().velocity, clientPlayer.transform.rotation, /*PlayerState.Idle,*/ "I have moved");
+                Packet pack = new Packet(username, Status.Movement, clientPlayer.transform.position, clientPlayer.GetComponent<CharacterMovement>().velocity, clientPlayer.transform.rotation, clientPlayer.GetComponent<CharacterMovement>().playerState.ToString());
                 byte[] messageBytes = SerializePacket(pack);  //Encoding.UTF8.GetBytes(responseMessage);
                 udpClient.Send(messageBytes, messageBytes.Length, serverEndPoint);
+
+                Debug.Log(JsonUtility.ToJson(pack));
+
             }
             yield return new WaitForSeconds(1.0f / interval);
         }

@@ -25,6 +25,7 @@ public class Server : MonoBehaviour
     public class Player
     {
         public string userID;
+        public PlayerState state;
         public Vector3 position;
         public Vector3 vel;
         public Quaternion rotation;
@@ -32,9 +33,10 @@ public class Server : MonoBehaviour
         public int life;
         public IPEndPoint ip;
 
-        public Player(string userID_, GameObject userGO_, Vector3 position_, Vector3 vel_, Quaternion rotation_, Color color_, int life_, IPEndPoint ip_)
+        public Player(string userID_, PlayerState _state, GameObject userGO_, Vector3 position_, Vector3 vel_, Quaternion rotation_, Color color_, int life_, IPEndPoint ip_)
         {
             userID = userID_;
+            state = _state;
             position = position_;
             vel = vel_;
             rotation = rotation_;
@@ -184,7 +186,7 @@ public class Server : MonoBehaviour
                 {
                     udpListener.Send(messageBytes, messageBytes.Length, player.ip);
                 }
-                Debug.Log("Sent replication " + JsonUtility.ToJson(pack));
+                //Debug.Log("Sent replication " + JsonUtility.ToJson(pack));
             }
             //TODO foreach Object add object to objectsList
             yield return new WaitForSeconds(1.0f / interval);
@@ -197,7 +199,7 @@ public class Server : MonoBehaviour
         {
             Vector3 col = JsonUtility.FromJson<Vector3>(pack.message);
 
-            Player newPlayer = new Player(pack.user, GameObject.Find("PlayerFromClient"), new Vector3(0, 0, 0), new Vector3(0, 0, 0), Quaternion.identity, new Vector4(col.x, col.y, col.z, 1), 100, /*PlayerState.Idle,*/ pack.ip);
+            Player newPlayer = new Player(pack.user, PlayerState.Idle, GameObject.Find("PlayerFromClient"), new Vector3(0, 0, 0), new Vector3(0, 0, 0), Quaternion.identity, new Vector4(col.x, col.y, col.z, 1), 100, /*PlayerState.Idle,*/ pack.ip);
             playersOnline.Add(newPlayer);
             if (playersOnline.Count > 0 && playerObjects.Count < playersOnline.Count)
             {
@@ -241,7 +243,16 @@ public class Server : MonoBehaviour
                     playersOnline[i].position = new Vector3(pack.position.x, pack.position.y, pack.position.z);
                     playersOnline[i].rotation = new Quaternion(pack.rotation.x, pack.rotation.y, pack.rotation.z, pack.rotation.w);
 
-                    // playersOnline[i].playerState = pack.playerState;
+                    PlayerState newState;
+                    EnemyController.EnemyState enemyState;
+                    if(Enum.TryParse(pack.message, out newState))
+                    {
+                        playersOnline[i].state = newState;
+                    }
+                    if (Enum.TryParse(pack.message, out enemyState))
+                    {
+                        playerObjects[i].GetComponent<EnemyController>().state = enemyState;
+                    }
                 }
             }
         }

@@ -280,7 +280,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   port: 12345
-  playerPrefab: {fileID: 109172321315190402, guid: be3d68e0cec93ca40b19726f1a3e3ee8, type: 3}
+  playerPrefab: {fileID: 1842235585690208521, guid: 2c2ebde8f8d31424e9ed1328a3f6b242, type: 3}
   playersOnline: []
   receivedPackets: []
   playerObjects: []
@@ -332,7 +332,7 @@ MonoBehaviour:
   serverPort: 12345
   username: Unknown
   clientPrefab: {fileID: 9170986602921684979, guid: 2fda048cd1f70e64aac590a793e4f572, type: 3}
-  playerPrefab: {fileID: 109172321315190402, guid: be3d68e0cec93ca40b19726f1a3e3ee8, type: 3}
+  playerPrefab: {fileID: 1842235585690208521, guid: 2c2ebde8f8d31424e9ed1328a3f6b242, type: 3}
   clientPlayer: {fileID: 0}
   serverCamera: {fileID: 0}
   clientCamera: {fileID: 0}

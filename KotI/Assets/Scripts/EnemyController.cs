@@ -13,7 +13,7 @@ public class EnemyController : MonoBehaviour
         Attacking
     }
 
-    //public Animator animator;
+    public Animator animator;
     public EnemyState state;
 
     public CharacterController controller;
@@ -34,12 +34,44 @@ public class EnemyController : MonoBehaviour
 
     private void Start()
     {
-        groundCheck = GameObject.Find("EnemyGroundCheck").GetComponent<Transform>();
-        //animator = GameObject.Find("NinjaGFX").GetComponent<Animator>();
+        groundCheck = gameObject.GetComponent<Transform>().Find("EnemyGroundCheck").GetComponent<Transform>();
+        animator = gameObject.GetComponentInChildren<Animator>();
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.DrawSphere(groundCheck.position, groundDistance);
     }
 
     private void Update()
     {
+        switch (state)
+        {
+            case EnemyState.Idle:
+                animator.SetInteger("AnimationType", 0);
+                break;
+
+            case EnemyState.Walking:
+                animator.SetInteger("AnimationType", 1);
+                speed = 6f;
+                break;
+
+            case EnemyState.Running:
+                animator.SetInteger("AnimationType", 2);
+                speed = 12f;
+                break;
+
+            case EnemyState.Jumping:
+                break;
+
+            case EnemyState.Attacking:
+                animator.SetInteger("AnimationType", 3);
+                break;
+
+            default:
+                break;
+        }
+
         isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
 
         velocity.y += gravity * Time.deltaTime;
