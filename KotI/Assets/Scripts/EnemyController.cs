@@ -10,7 +10,8 @@ public class EnemyController : MonoBehaviour
         Walking,
         Running,
         Jumping,
-        Attacking
+        Attacking,
+        Bouncing
     }
 
     public Animator animator;
@@ -31,6 +32,11 @@ public class EnemyController : MonoBehaviour
     public bool isGrounded;
 
     public Vector3 velocity;
+    public Vector3 dir;
+    public Vector3 moveDirection;
+
+    public float turnSmoothTime = 0.1f;
+    float turnSmoothVel;
 
     private void Start()
     {
@@ -45,6 +51,8 @@ public class EnemyController : MonoBehaviour
 
     private void Update()
     {
+        isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
+
         switch (state)
         {
             case EnemyState.Idle:
@@ -62,6 +70,12 @@ public class EnemyController : MonoBehaviour
                 break;
 
             case EnemyState.Jumping:
+                if(!isGrounded)
+                {
+                    Jump();
+                }
+                break;
+            case EnemyState.Bouncing:
                 break;
 
             case EnemyState.Attacking:
@@ -72,7 +86,10 @@ public class EnemyController : MonoBehaviour
                 break;
         }
 
-        isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
+        if(dir.magnitude >= 0.1f)
+        {
+            controller.Move(moveDirection.normalized * speed * Time.deltaTime);
+        }
 
         velocity.y += gravity * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
@@ -103,6 +120,8 @@ public class EnemyController : MonoBehaviour
 
     public void BounceBack(float x, float z, float force)
     {
+        GameObject.Find("Client").GetComponent<Client>().SendBouncePacket(gameObject.name, x, z, force);
+        Jump();
         velocity.x = x * force;
         velocity.z = z * force;
     }

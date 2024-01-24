@@ -67,7 +67,7 @@ public class Client : MonoBehaviour
             Vector3 col = new Vector3(PlayerPrefs.GetFloat("ColorR"), PlayerPrefs.GetFloat("ColorG"), PlayerPrefs.GetFloat("ColorB"));
             string message = JsonUtility.ToJson(col);
             //byte[] messageBytes = Encoding.UTF8.GetBytes(message);
-            Packet pack = new Packet(username, Status.Connect, new Vector3(0, 1, 0), new Vector3(0, 0, 0), Quaternion.identity, /*PlayerState.Idle,*/ message);
+            Packet pack = new Packet(username, Status.Connect, clientPlayer.transform.position, new Vector3(0, 0, 0), new Vector3(0, 0, 0), Quaternion.identity, /*PlayerState.Idle,*/ message);
 
             byte[] messageBytes = SerializePacket(pack);  //Encoding.UTF8.GetBytes(responseMessage);
 
@@ -82,8 +82,8 @@ public class Client : MonoBehaviour
         {
             Debug.LogError("Error setting up UDP client: " + e.Message);
         }
-        StartCoroutine(SendPacket(30.0f));
-        StartCoroutine(WaitForMessages(60.0f));
+        StartCoroutine(SendPacket(60.0f));
+        StartCoroutine(WaitForMessages(120.0f));
         //StartCoroutine(ProcessReplication(30.0f));
     }
 
@@ -93,7 +93,7 @@ public class Client : MonoBehaviour
         {
             string message = "Hello from the client!";
             //byte[] messageBytes = Encoding.UTF8.GetBytes(message);
-            Packet pack = new Packet(username, Status.Connect, new Vector3(0, 1, 0), new Vector3(0, 0, 0), Quaternion.identity, /*PlayerState.Idle,*/ message);
+            Packet pack = new Packet(username, Status.Connect, new Vector3(0, 1, 0), new Vector3(0, 0, 0), new Vector3(0, 0, 0), Quaternion.identity, /*PlayerState.Idle,*/ message);
 
             byte[] messageBytes = SerializePacket(pack);  //Encoding.UTF8.GetBytes(responseMessage);
 
@@ -106,9 +106,26 @@ public class Client : MonoBehaviour
         //PROCESS REPLICATION
         if (lastRepPacket != null)
         {
-            Debug.Log(JsonUtility.ToJson(lastRepPacket));
+            //Debug.Log(JsonUtility.ToJson(lastRepPacket));
+
+            if(lastRepPacket.status == Status.Bounce)
+            {
+                if (lastRepPacket.message == username)
+                {
+                    if(lastRepPacket.message == username)
+                    {
+                        GameObject.Find("Player").GetComponent<CharacterMovement>().BounceBack(lastRepPacket.position.x, lastRepPacket.position.y, lastRepPacket.position.z);
+                        Debug.Log(lastRepPacket.position);
+                    }
+                }
+                else if(lastRepPacket.user == username)
+                {
+
+                }
+            }
+            
             //CONNECT A PLAYER
-            if (lastRepPacket.playerList.Count > players.Count + 1)
+            if (lastRepPacket.playerList.Count > players.Count + 1) 
             {
                 for (int i = 0; i < lastRepPacket.playerList.Count; i++)
                 {
@@ -133,13 +150,16 @@ public class Client : MonoBehaviour
                         playersObjects[i - index].transform.rotation = lastRepPacket.playerList[i].rotation;
                         playersObjects[i - index].GetComponent<Rigidbody>().velocity = lastRepPacket.playerList[i].vel;
                         players[i - index].state = lastRepPacket.playerList[i].state;
+                        players[i - index].vel = lastRepPacket.playerList[i].vel;
+                        players[i - index].dir = lastRepPacket.playerList[i].dir;
 
                         EnemyController.EnemyState enemyState;
                         if (Enum.TryParse(players[i - index].state.ToString(), out enemyState))
                         {
                             playersObjects[i - index].GetComponent<EnemyController>().state = enemyState;
+                            playersObjects[i - index].GetComponent<EnemyController>().dir = lastRepPacket.playerList[i].dir;
+                            playersObjects[i - index].GetComponent<EnemyController>().moveDirection = lastRepPacket.playerList[i].vel;
                         }
-
                     }
                     else
                     {
@@ -164,7 +184,7 @@ public class Client : MonoBehaviour
                 playersObjects.RemoveAt(playerIndex);
             }
             lastRepPacket = null;
-            Debug.Log("Client processed a packet successfully");
+            //Debug.Log("Client processed a packet successfully");
         }
     }
 
@@ -218,7 +238,7 @@ public class Client : MonoBehaviour
             // Simulate the packet loss by randomly deciding whether to send the packet
             //if (Random.value < 0.5f) // Adjustable (in this case 0.9 represents a 90% chance of sending the package)
             {
-                Packet pack = new Packet(username, Status.Movement, clientPlayer.transform.position, clientPlayer.GetComponent<CharacterMovement>().velocity, clientPlayer.transform.rotation, clientPlayer.GetComponent<CharacterMovement>().playerState.ToString());
+                Packet pack = new Packet(username, Status.Movement, clientPlayer.transform.position, clientPlayer.GetComponent<CharacterMovement>().dir, clientPlayer.GetComponent<CharacterMovement>().moveDirection, clientPlayer.transform.rotation, clientPlayer.GetComponent<CharacterMovement>().playerState.ToString());
                 byte[] messageBytes = SerializePacket(pack);  //Encoding.UTF8.GetBytes(responseMessage);
                 udpClient.Send(messageBytes, messageBytes.Length, serverEndPoint);
 
@@ -227,6 +247,20 @@ public class Client : MonoBehaviour
             }
             yield return new WaitForSeconds(1.0f / interval);
         }
+    }
+
+    public void SendBouncePacket(string name, float x, float z, float force)
+    {
+        Vector3 vector3 = new Vector3(x, z, force);
+        Packet pack = new Packet(username, Status.Bounce, vector3, clientPlayer.GetComponent<CharacterMovement>().dir, clientPlayer.GetComponent<CharacterMovement>().moveDirection, clientPlayer.transform.rotation, name);
+        byte[] messageBytes = SerializePacket(pack);  //Encoding.UTF8.GetBytes(responseMessage);
+        udpClient.Send(messageBytes, messageBytes.Length, serverEndPoint);
+
+        Debug.Log(username + "ha pegado a " + name);
+
+        //Debug.Log(JsonUtility.ToJson(pack));
+
+
     }
 
     private IEnumerator InterpolatePosition(Vector3 targetPosition)
@@ -328,7 +362,7 @@ public class Client : MonoBehaviour
     public void OnApplicationQuit()
     {
         string message = "Bye from the client!";
-        Packet pack = new Packet(username, Status.Disconnect, new Vector3(0, 1, 0), new Vector3(0, 0, 0), Quaternion.identity, /*PlayerState.Idle,*/ message);
+        Packet pack = new Packet(username, Status.Disconnect, new Vector3(0, 1, 0), new Vector3(0, 0, 0), new Vector3(0, 0, 0), Quaternion.identity, message);
         byte[] messageBytes = SerializePacket(pack);  //Encoding.UTF8.GetBytes(responseMessage);
         udpClient.Send(messageBytes, messageBytes.Length, serverEndPoint);
         //byte[] messageBytes = Encoding.UTF8.GetBytes(message);
@@ -337,8 +371,8 @@ public class Client : MonoBehaviour
     public void AddNewPlayer(Player player)
     {
         players.Add(player);
-        GameObject temp = Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
-        temp.name = "Player " + player.userID;
+        GameObject temp = Instantiate(playerPrefab, player.position, Quaternion.identity);
+        temp.name = player.userID;
         temp.GetComponentInChildren<SkinnedMeshRenderer>().materials[1].SetColor("_Color", new Color(player.color.r, player.color.g, player.color.b, player.color.a));
         playersObjects.Add(temp);
     }

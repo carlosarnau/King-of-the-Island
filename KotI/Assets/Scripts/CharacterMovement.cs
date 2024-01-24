@@ -10,7 +10,8 @@ public class CharacterMovement : MonoBehaviour
         Walking,
         Running,
         Jumping,
-        Attacking
+        Attacking,
+        Bouncing
     }
 
     public Animator animator;
@@ -19,6 +20,7 @@ public class CharacterMovement : MonoBehaviour
     public CharacterController controller;
     public Transform cam;
     public Transform groundCheck;
+    public Vector3 moveDirection;
 
     public float speed = 6f;
     public float gravity = -15f;
@@ -29,8 +31,10 @@ public class CharacterMovement : MonoBehaviour
 
     bool isGrounded;
     bool isAttacking;
+    bool canStop;
 
     public Vector3 velocity;
+    public Vector3 dir;
 
     public float turnSmoothTime = 0.1f;
     float turnSmoothVel;
@@ -44,6 +48,7 @@ public class CharacterMovement : MonoBehaviour
 
     void Update()
     {
+
         switch(playerState)
         {
             case PlayerState.Idle:
@@ -61,6 +66,9 @@ public class CharacterMovement : MonoBehaviour
                 break;
 
             case PlayerState.Jumping:
+                break;
+
+            case PlayerState.Bouncing:
                 break;
 
             case PlayerState.Attacking:
@@ -88,6 +96,7 @@ public class CharacterMovement : MonoBehaviour
         float vertical = Input.GetAxisRaw("Vertical");
 
         Vector3 direction = new Vector3 (horizontal, 0f, vertical).normalized;
+        dir = direction;
 
         if (Input.GetMouseButton(0) && !isAttacking)
         {
@@ -102,9 +111,7 @@ public class CharacterMovement : MonoBehaviour
             float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref turnSmoothVel, turnSmoothTime);
             transform.rotation = Quaternion.Euler(0f, angle, 0f);
 
-            Vector3 moveDirection = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
-            velocity.x = moveDirection.x;
-            velocity.z = moveDirection.z;
+            moveDirection = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
 
             controller.Move(moveDirection.normalized * speed * Time.deltaTime);
 
@@ -120,13 +127,6 @@ public class CharacterMovement : MonoBehaviour
         else if(isGrounded && !isAttacking)
         {
             playerState= PlayerState.Idle;
-            velocity.x = 0;
-            velocity.z = 0;
-        }
-        else
-        {
-            velocity.x = 0;
-            velocity.z = 0;
         }
 
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
@@ -136,6 +136,19 @@ public class CharacterMovement : MonoBehaviour
             Jump();
         }
 
+        if (isGrounded && canStop)
+        {
+            velocity.x = 0;
+            velocity.z = 0;
+
+            canStop = false;
+        }
+
+        if (velocity.y < -2)
+        {
+            canStop = true;
+        }
+
         velocity.y += gravity * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
     }
@@ -143,5 +156,12 @@ public class CharacterMovement : MonoBehaviour
     private void Jump()
     {
         velocity.y = jumpForce;
+    }
+
+    public void BounceBack(float x, float z, float force)
+    {
+        Jump();
+        velocity.x = x * force;
+        velocity.z = z * force;
     }
 }

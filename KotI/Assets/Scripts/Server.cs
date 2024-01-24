@@ -27,17 +27,19 @@ public class Server : MonoBehaviour
         public string userID;
         public PlayerState state;
         public Vector3 position;
+        public Vector3 dir;
         public Vector3 vel;
         public Quaternion rotation;
         public Color color;
         public int life;
         public IPEndPoint ip;
 
-        public Player(string userID_, PlayerState _state, GameObject userGO_, Vector3 position_, Vector3 vel_, Quaternion rotation_, Color color_, int life_, IPEndPoint ip_)
+        public Player(string userID_, PlayerState _state, GameObject userGO_, Vector3 position_, Vector3 dir_, Vector3 vel_, Quaternion rotation_, Color color_, int life_, IPEndPoint ip_)
         {
             userID = userID_;
             state = _state;
             position = position_;
+            dir = dir_;
             vel = vel_;
             rotation = rotation_;
             color = color_;
@@ -51,6 +53,7 @@ public class Server : MonoBehaviour
         public string user;
         public Status status;
         public Vector3 position;
+        public Vector3 dir;
         public Vector3 vel;
         public Quaternion rotation;
         public string message;
@@ -59,11 +62,12 @@ public class Server : MonoBehaviour
         public List<Object> objectList;
         public DateTime time;
 
-        public Packet(String user, Status status, Vector3 position, Vector3 vel,  Quaternion rotation_, string message)
+        public Packet(String user, Status status, Vector3 position, Vector3 dir_, Vector3 vel,  Quaternion rotation_, string message)
         {
             this.user = user;
             this.status = status;
             this.position = position;
+            this.dir = dir_;
             this.rotation = rotation_;
             this.message = message;
             playerList = new List<Player>();
@@ -90,12 +94,14 @@ public class Server : MonoBehaviour
     public enum ObjectType
     {
         Item,
+        Water,
         unknown
     }
     public enum Status
     {
         Idle,
         Connect,
+        Bounce,
         Replication,
         Disconnect,
         Chat,
@@ -123,7 +129,7 @@ public class Server : MonoBehaviour
             Debug.LogError("Error setting up UDP server: " + e.Message);
         }
         StartCoroutine(WaitForMessages());
-        StartCoroutine(SendReplication(30.0f));
+        StartCoroutine(SendReplication(60.0f));
     }
 
     private IEnumerator WaitForMessages()
@@ -174,19 +180,19 @@ public class Server : MonoBehaviour
         {
             if (playersOnline.Count > 0)
             {
-                Packet pack = new Packet("Server", Status.Replication, new Vector3(0, 0, 0), new Vector3(0, 0, 0), Quaternion.identity, /*PlayerState.Idle,*/ "Replication");
+                Packet pack = new Packet("Server", Status.Replication, new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 0, 0), Quaternion.identity, /*PlayerState.Idle,*/ "Replication");
                 foreach (Player player in playersOnline)
                 {
                     pack.playerList.Add(player);
                 }
-                //string messageString = JsonConvert.SerializeObject(pack/*, new JsonSerializerSettings() { ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore }*/);  //Encoding.UTF8.GetBytes(responseMessage); <<  get cancer
+                
                 var messageBytes = SerializePacket(pack);
 
                 foreach (Player player in playersOnline)
                 {
                     udpListener.Send(messageBytes, messageBytes.Length, player.ip);
                 }
-                Debug.Log("Sent replication " + JsonUtility.ToJson(pack));
+                //Debug.Log("Sent replication " + JsonUtility.ToJson(pack));
             }
             //TODO foreach Object add object to objectsList
             yield return new WaitForSeconds(1.0f / interval);
@@ -199,7 +205,7 @@ public class Server : MonoBehaviour
         {
             Vector3 col = JsonUtility.FromJson<Vector3>(pack.message);
 
-            Player newPlayer = new Player(pack.user, PlayerState.Idle, GameObject.Find("PlayerFromClient"), new Vector3(0, 0, 0), new Vector3(0, 0, 0), Quaternion.identity, new Vector4(col.x, col.y, col.z, 1), 100, /*PlayerState.Idle,*/ pack.ip);
+            Player newPlayer = new Player(pack.user, PlayerState.Idle, GameObject.Find("PlayerFromClient"), pack.position, new Vector3(0, 0, 0), new Vector3(0, 0, 0), Quaternion.identity, new Vector4(col.x, col.y, col.z, 1), 100, /*PlayerState.Idle,*/ pack.ip);
             playersOnline.Add(newPlayer);
             if (playersOnline.Count > 0 && playerObjects.Count < playersOnline.Count)
             {
@@ -226,6 +232,28 @@ public class Server : MonoBehaviour
             Debug.Log("Player " + pack.user + " disconnected");
         }
 
+        else if (pack.status == Status.Bounce)
+        {
+            Debug.Log(pack.user);
+
+            if (playersOnline.Count > 0)
+            {
+                Packet bouncePacket = new Packet("Server", Status.Bounce, pack.position, new Vector3(0, 0, 0), new Vector3(0, 0, 0), Quaternion.identity, pack.message);
+                foreach (Player player in playersOnline)
+                {
+                    pack.playerList.Add(player);
+                }
+
+                var messageBytes = SerializePacket(bouncePacket);
+
+                foreach (Player player in playersOnline)
+                {
+                    udpListener.Send(messageBytes, messageBytes.Length, player.ip);
+                }
+                //Debug.Log("Sent replication " + JsonUtility.ToJson(pack));
+            }
+        }
+
         // Uncomment this block when you have the implementation for chat
         //if (lastPacket.status == Status.Chat)
         //{
@@ -242,6 +270,9 @@ public class Server : MonoBehaviour
                     playerObjects[i].transform.SetPositionAndRotation(new Vector3(pack.position.x, pack.position.y, pack.position.z), pack.rotation);
                     playersOnline[i].position = new Vector3(pack.position.x, pack.position.y, pack.position.z);
                     playersOnline[i].rotation = new Quaternion(pack.rotation.x, pack.rotation.y, pack.rotation.z, pack.rotation.w);
+
+                    playersOnline[i].vel = pack.vel;
+                    playersOnline[i].dir = pack.dir;
 
                     PlayerState newState;
                     EnemyController.EnemyState enemyState;

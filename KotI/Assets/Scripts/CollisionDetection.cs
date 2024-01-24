@@ -18,7 +18,6 @@ public class CollisionDetection : MonoBehaviour
         {
             Vector3 bounceDirection = new Vector3(other.gameObject.GetComponent<Transform>().transform.position.x - transform.position.x, 0, other.gameObject.GetComponent<Transform>().transform.position.z - transform.position.z);
             Debug.Log("hitting enemy");
-            other.gameObject.GetComponent<EnemyController>().Jump();
             other.gameObject.GetComponent<EnemyController>().BounceBack(bounceDirection.x, bounceDirection.z, force);
         }
     }
