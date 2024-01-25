@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,7 +6,7 @@ public class MenuController : MonoBehaviour
     public Slider colorR;
     public Slider colorG;
     public Slider colorB;
-    
+
     void Start()
     {
         colorR.onValueChanged.AddListener((v) =>

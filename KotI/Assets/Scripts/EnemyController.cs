@@ -1,5 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class EnemyController : MonoBehaviour
@@ -70,7 +69,7 @@ public class EnemyController : MonoBehaviour
                 break;
 
             case EnemyState.Jumping:
-                if(!isGrounded)
+                if (!isGrounded)
                 {
                     Jump();
                 }
@@ -86,7 +85,7 @@ public class EnemyController : MonoBehaviour
                 break;
         }
 
-        if(dir.magnitude >= 0.1f)
+        if (dir.magnitude >= 0.1f)
         {
             controller.Move(moveDirection.normalized * speed * Time.deltaTime);
         }
@@ -111,6 +110,16 @@ public class EnemyController : MonoBehaviour
         {
             canStop = true;
         }
+
+        TextMeshPro text = GetComponentInChildren<TextMeshPro>();
+        if (text.gameObject != null)
+        {
+            Camera mainCamera = Camera.main;
+            Quaternion lookRotation = Quaternion.LookRotation(mainCamera.transform.forward, mainCamera.transform.up);
+            text.gameObject.transform.rotation = lookRotation;
+            text.text = name;
+        }
+
     }
 
     public void Jump()

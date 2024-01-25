@@ -1,9 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class CharacterMovement : MonoBehaviour
-{   
+{
     public enum PlayerState
     {
         Idle,
@@ -49,7 +48,7 @@ public class CharacterMovement : MonoBehaviour
     void Update()
     {
 
-        switch(playerState)
+        switch (playerState)
         {
             case PlayerState.Idle:
                 animator.SetInteger("AnimationType", 0);
@@ -73,7 +72,7 @@ public class CharacterMovement : MonoBehaviour
 
             case PlayerState.Attacking:
                 animator.SetInteger("AnimationType", 3);
-                if(animator.GetCurrentAnimatorStateInfo(0).normalizedTime > 0.7f)
+                if (animator.GetCurrentAnimatorStateInfo(0).normalizedTime > 0.7f)
                 {
                     isAttacking = false;
                     playerState = PlayerState.Idle;
@@ -87,7 +86,7 @@ public class CharacterMovement : MonoBehaviour
 
         isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
 
-        if(isGrounded && velocity.y < 0)
+        if (isGrounded && velocity.y < 0)
         {
             velocity.y = -2;
         }
@@ -95,7 +94,7 @@ public class CharacterMovement : MonoBehaviour
         float horizontal = Input.GetAxisRaw("Horizontal");
         float vertical = Input.GetAxisRaw("Vertical");
 
-        Vector3 direction = new Vector3 (horizontal, 0f, vertical).normalized;
+        Vector3 direction = new Vector3(horizontal, 0f, vertical).normalized;
         dir = direction;
 
         if (Input.GetMouseButton(0) && !isAttacking)
@@ -119,19 +118,19 @@ public class CharacterMovement : MonoBehaviour
             {
                 playerState = PlayerState.Running;
             }
-            else if(!isAttacking)
+            else if (!isAttacking)
             {
                 playerState = PlayerState.Walking;
             }
         }
-        else if(isGrounded && !isAttacking)
+        else if (isGrounded && !isAttacking)
         {
-            playerState= PlayerState.Idle;
+            playerState = PlayerState.Idle;
         }
 
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
         {
-            if(!isAttacking)
+            if (!isAttacking)
                 playerState = PlayerState.Jumping;
             Jump();
         }
@@ -151,6 +150,16 @@ public class CharacterMovement : MonoBehaviour
 
         velocity.y += gravity * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
+
+        TextMeshPro text = GetComponentInChildren<TextMeshPro>();
+        if (text.gameObject != null)
+        {
+            Camera mainCamera = Camera.main;
+            Quaternion lookRotation = Quaternion.LookRotation(mainCamera.transform.forward, mainCamera.transform.up);
+            text.gameObject.transform.rotation = lookRotation;
+            text.text = PlayerPrefs.GetString("username");
+        }
+
     }
 
     private void Jump()

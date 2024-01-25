@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using UnityEngine;
-using static CharacterMovement;
 //using Newtonsoft.Json;
 using static Server;
 using Random = UnityEngine.Random;
@@ -108,24 +107,24 @@ public class Client : MonoBehaviour
         {
             //Debug.Log(JsonUtility.ToJson(lastRepPacket));
 
-            if(lastRepPacket.status == Status.Bounce)
+            if (lastRepPacket.status == Status.Bounce)
             {
                 if (lastRepPacket.message == username)
                 {
-                    if(lastRepPacket.message == username)
+                    if (lastRepPacket.message == username)
                     {
                         GameObject.Find("Player").GetComponent<CharacterMovement>().BounceBack(lastRepPacket.position.x, lastRepPacket.position.y, lastRepPacket.position.z);
                         Debug.Log(lastRepPacket.position);
                     }
                 }
-                else if(lastRepPacket.user == username)
+                else if (lastRepPacket.user == username)
                 {
 
                 }
             }
-            
+
             //CONNECT A PLAYER
-            if (lastRepPacket.playerList.Count > players.Count + 1) 
+            if (lastRepPacket.playerList.Count > players.Count + 1)
             {
                 for (int i = 0; i < lastRepPacket.playerList.Count; i++)
                 {
@@ -145,7 +144,7 @@ public class Client : MonoBehaviour
                 {
                     if (lastRepPacket.playerList[i].userID != username)
                     {
-                        players[i - index].position = lastRepPacket.playerList[i].position; 
+                        players[i - index].position = lastRepPacket.playerList[i].position;
                         playersObjects[i - index].transform.position = lastRepPacket.playerList[i].position;
                         playersObjects[i - index].transform.rotation = lastRepPacket.playerList[i].rotation;
                         playersObjects[i - index].GetComponent<Rigidbody>().velocity = lastRepPacket.playerList[i].vel;

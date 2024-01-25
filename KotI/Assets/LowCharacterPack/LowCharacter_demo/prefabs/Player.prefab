@@ -1876,7 +1876,7 @@ Transform:
   - {fileID: 7998998934870790743}
   - {fileID: 4900582513168871350}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
+  m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!143 &2983930979770219903
 CharacterController:
@@ -1921,6 +1921,7 @@ MonoBehaviour:
   controller: {fileID: 2983930979770219903}
   cam: {fileID: 0}
   groundCheck: {fileID: 0}
+  moveDirection: {x: 0, y: 0, z: 0}
   speed: 6
   gravity: -30
   groundDistance: 0.3
@@ -1929,4 +1930,5 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 1024
   velocity: {x: 0, y: 0, z: 0}
+  dir: {x: 0, y: 0, z: 0}
   turnSmoothTime: 0.1

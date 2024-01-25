@@ -1,11 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using Cinemachine;
+using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
-    
+
     void Start()
     {
         gameObject.GetComponent<CinemachineFreeLook>().LookAt = GameObject.Find("Player").transform;

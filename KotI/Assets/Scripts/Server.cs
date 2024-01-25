@@ -62,7 +62,7 @@ public class Server : MonoBehaviour
         public List<Object> objectList;
         public DateTime time;
 
-        public Packet(String user, Status status, Vector3 position, Vector3 dir_, Vector3 vel,  Quaternion rotation_, string message)
+        public Packet(String user, Status status, Vector3 position, Vector3 dir_, Vector3 vel, Quaternion rotation_, string message)
         {
             this.user = user;
             this.status = status;
@@ -185,7 +185,7 @@ public class Server : MonoBehaviour
                 {
                     pack.playerList.Add(player);
                 }
-                
+
                 var messageBytes = SerializePacket(pack);
 
                 foreach (Player player in playersOnline)
@@ -276,7 +276,7 @@ public class Server : MonoBehaviour
 
                     PlayerState newState;
                     EnemyController.EnemyState enemyState;
-                    if(Enum.TryParse(pack.message, out newState))
+                    if (Enum.TryParse(pack.message, out newState))
                     {
                         playersOnline[i].state = newState;
                     }
