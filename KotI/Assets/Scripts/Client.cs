@@ -20,7 +20,7 @@ public class Client : MonoBehaviour
     public GameObject clientPlayer;
     public GameObject serverCamera;
     public GameObject clientCamera;
-    public Packet lastRepPacket;
+    public List<Packet> lastRepPackets = new List<Packet>();
     public List<Player> players = new List<Player>();
     public List<GameObject> playersObjects = new List<GameObject>();
     private Vector3 predictedPosition;
@@ -103,86 +103,90 @@ public class Client : MonoBehaviour
         }
 
         //PROCESS REPLICATION
-        if (lastRepPacket != null)
+        foreach (Packet lastRepPacket in lastRepPackets)
         {
-            //Debug.Log(JsonUtility.ToJson(lastRepPacket));
-
-            if (lastRepPacket.status == Status.Bounce)
+            if (lastRepPacket != null)
             {
-                Debug.Log(lastRepPacket.position);
+                //Debug.Log(JsonUtility.ToJson(lastRepPacket));
 
-                if (lastRepPacket.message == username)
+                if (lastRepPacket.status == Status.Bounce)
                 {
+                    Debug.Log(lastRepPacket.position);
+
                     if (lastRepPacket.message == username)
                     {
-                        GameObject.Find("Player").GetComponent<CharacterMovement>().BounceBack(lastRepPacket.position.x, lastRepPacket.position.y, lastRepPacket.position.z);
-                        Debug.Log(lastRepPacket.position);
-                    }
-                }
-            }
-
-            //CONNECT A PLAYER
-            if (lastRepPacket.playerList.Count > players.Count + 1)
-            {
-                for (int i = 0; i < lastRepPacket.playerList.Count; i++)
-                {
-                    if (lastRepPacket.playerList[i].userID != username && !players.Exists(player => player.userID == lastRepPacket.playerList[i].userID))
-                    {
-                        AddNewPlayer(lastRepPacket.playerList[i]);
-                        Debug.Log("añadido el player " + lastRepPacket.playerList[i].userID);
-                    }
-                }
-            }
-
-            if (players.Count > 0 && players.Count == lastRepPacket.playerList.Count - 1)
-            {
-                int index = 0;
-
-                for (int i = 0; i < lastRepPacket.playerList.Count; i++)
-                {
-                    if (lastRepPacket.playerList[i].userID != username)
-                    {
-                        players[i - index].position = lastRepPacket.playerList[i].position;
-                        playersObjects[i - index].transform.position = lastRepPacket.playerList[i].position;
-                        playersObjects[i - index].transform.rotation = lastRepPacket.playerList[i].rotation;
-                        playersObjects[i - index].GetComponent<Rigidbody>().velocity = lastRepPacket.playerList[i].vel;
-                        players[i - index].state = lastRepPacket.playerList[i].state;
-                        players[i - index].vel = lastRepPacket.playerList[i].vel;
-                        players[i - index].dir = lastRepPacket.playerList[i].dir;
-
-                        EnemyController.EnemyState enemyState;
-                        if (Enum.TryParse(players[i - index].state.ToString(), out enemyState))
+                        if (lastRepPacket.message == username)
                         {
-                            playersObjects[i - index].GetComponent<EnemyController>().state = enemyState;
-                            playersObjects[i - index].GetComponent<EnemyController>().dir = lastRepPacket.playerList[i].dir;
-                            playersObjects[i - index].GetComponent<EnemyController>().moveDirection = lastRepPacket.playerList[i].vel;
+                            GameObject.Find("Player").GetComponent<CharacterMovement>().BounceBack(lastRepPacket.position.x, lastRepPacket.position.y, lastRepPacket.position.z);
+                            Debug.Log(lastRepPacket.position);
                         }
                     }
-                    else
-                    {
-                        index = 1;
-                    }
                 }
-            }
 
-            if (lastRepPacket.playerList.Count > 0 && lastRepPacket.playerList.Count < players.Count + 1)
-            {
-                int playerIndex = 0;
-                for (int i = 0; i < players.Count; i++)
+                //CONNECT A PLAYER
+                if (lastRepPacket.playerList.Count > players.Count + 1)
                 {
-                    if (!lastRepPacket.playerList.Exists(player => player.userID == players[i].userID))
+                    for (int i = 0; i < lastRepPacket.playerList.Count; i++)
                     {
-                        playerIndex = i;
+                        if (lastRepPacket.playerList[i].userID != username && !players.Exists(player => player.userID == lastRepPacket.playerList[i].userID))
+                        {
+                            AddNewPlayer(lastRepPacket.playerList[i]);
+                            Debug.Log("añadido el player " + lastRepPacket.playerList[i].userID);
+                        }
                     }
                 }
-                Debug.Log(playerIndex);
-                players.RemoveAt(playerIndex);
-                Destroy(playersObjects[playerIndex]);
-                playersObjects.RemoveAt(playerIndex);
+
+                if (players.Count > 0 && players.Count == lastRepPacket.playerList.Count - 1)
+                {
+                    int index = 0;
+
+                    for (int i = 0; i < lastRepPacket.playerList.Count; i++)
+                    {
+                        if (lastRepPacket.playerList[i].userID != username)
+                        {
+                            players[i - index].position = lastRepPacket.playerList[i].position;
+                            playersObjects[i - index].transform.position = lastRepPacket.playerList[i].position;
+                            playersObjects[i - index].transform.rotation = lastRepPacket.playerList[i].rotation;
+                            playersObjects[i - index].GetComponent<Rigidbody>().velocity = lastRepPacket.playerList[i].vel;
+                            players[i - index].state = lastRepPacket.playerList[i].state;
+                            players[i - index].vel = lastRepPacket.playerList[i].vel;
+                            players[i - index].dir = lastRepPacket.playerList[i].dir;
+
+                            EnemyController.EnemyState enemyState;
+                            if (Enum.TryParse(players[i - index].state.ToString(), out enemyState))
+                            {
+                                playersObjects[i - index].GetComponent<EnemyController>().state = enemyState;
+                                playersObjects[i - index].GetComponent<EnemyController>().dir = lastRepPacket.playerList[i].dir;
+                                playersObjects[i - index].GetComponent<EnemyController>().moveDirection = lastRepPacket.playerList[i].vel;
+                            }
+                        }
+                        else
+                        {
+                            index = 1;
+                        }
+                    }
+                }
+
+                if (lastRepPacket.playerList.Count > 0 && lastRepPacket.playerList.Count < players.Count + 1)
+                {
+                    int playerIndex = 0;
+                    for (int i = 0; i < players.Count; i++)
+                    {
+                        if (!lastRepPacket.playerList.Exists(player => player.userID == players[i].userID))
+                        {
+                            playerIndex = i;
+                        }
+                    }
+                    Debug.Log(playerIndex);
+                    players.RemoveAt(playerIndex);
+                    Destroy(playersObjects[playerIndex]);
+                    playersObjects.RemoveAt(playerIndex);
+                }
+                //lastRepPacket = null;
+                //Debug.Log("Client processed a packet successfully");
             }
-            lastRepPacket = null;
-            //Debug.Log("Client processed a packet successfully");
         }
+        lastRepPackets.Clear();
     }
 
     private IEnumerator WaitForMessages(float interval)
@@ -202,28 +206,28 @@ public class Client : MonoBehaviour
         }
     }
 
-    private IEnumerator ProcessReplication(float interval)
-    {
-        while (true)
-        {
-            if (lastRepPacket != null)
-            {
-                if (players.Count != lastRepPacket.playerList.Count)
-                    Debug.Log("Client detected a Player has connected or disconnected");
-                //TODO foreach Object add object to objectsList
+    //private IEnumerator ProcessReplication(float interval)  DEPRECATED
+    //{
+    //    while (true)
+    //    {
+    //        if (lastRepPacket != null)
+    //        {
+    //            if (players.Count != lastRepPacket.playerList.Count)
+    //                Debug.Log("Client detected a Player has connected or disconnected");
+    //            //TODO foreach Object add object to objectsList
 
-                //foreach (Player player in playersOnline)
-                //{
-                //    udpListener.Send(messageBytes, messageBytes.Length, player.ip);
+    //            //foreach (Player player in playersOnline)
+    //            //{
+    //            //    udpListener.Send(messageBytes, messageBytes.Length, player.ip);
 
-                //}
+    //            //}
 
-                lastRepPacket = null;
-                Debug.Log("Client processed a packet successfully");
-            }
-            yield return new WaitForSeconds(1.0f / interval);
-        }
-    }
+    //            lastRepPacket = null;
+    //            Debug.Log("Client processed a packet successfully");
+    //        }
+    //        yield return new WaitForSeconds(1.0f / interval);
+    //    }
+    //}
 
     private IEnumerator SendPacket(float interval)
     {
@@ -289,7 +293,8 @@ public class Client : MonoBehaviour
                 byte[] receivedBytes = udpClient.EndReceive(ar, ref serverEndPoint);
                 Packet responsePacket = DeserializePacket(receivedBytes);
                 HandleResponse(responsePacket);
-                lastRepPacket = responsePacket;
+                lastRepPackets.Add(responsePacket); 
+                //lastRepPacket = responsePacket;
 
                 //string responseMessage = Encoding.UTF8.GetString(receivedBytes);
                 // Handle the received response from the server.

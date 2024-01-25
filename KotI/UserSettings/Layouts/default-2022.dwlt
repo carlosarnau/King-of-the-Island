@@ -119,7 +119,7 @@ MonoBehaviour:
   m_MinSize: {x: 300, y: 100}
   m_MaxSize: {x: 24288, y: 16192}
   vertical: 0
-  controlID: 41
+  controlID: 103
 --- !u!114 &6
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -270,8 +270,8 @@ MonoBehaviour:
     y: 0
     width: 461
     height: 947
-  m_MinSize: {x: 275, y: 50}
-  m_MaxSize: {x: 4000, y: 4000}
+  m_MinSize: {x: 276, y: 71}
+  m_MaxSize: {x: 4001, y: 4021}
   m_ActualView: {fileID: 18}
   m_Panes:
   - {fileID: 18}
@@ -386,7 +386,7 @@ MonoBehaviour:
       scrollPos: {x: 0, y: 0}
       m_SelectedIDs: 
       m_LastClickedID: 0
-      m_ExpandedIDs: 9496fdff5097fdff5c97fdff8c98fdff48a1fdff98a1fdff9ea3fdff94a4fdff40befdff1cbffdff24bffdff70bffdff3cc4fdff
+      m_ExpandedIDs: e2acdbffb8b7dbff06b8dbff14badbff12bbdbffb492feffb692feffb892feffbe92feffc492feffc692feffc892feffca92feffcc92feffd092feffd292feffd492feffd692feffd892feffdc92feffde92feffe092feffe492feffe692feffe892feffea92feffec92feffee92fefff092fefff292fefff492fefff692fefffa92fefffc92fefffe92feff0293feff0493feff0693feff0893feff0a93feff0e93feff1093feff1293feff1493feff1893feff1a93feff1c93feff1e93feff2293feff2493feff2693feff2c93feff2e93feff3093feff3293feff3493feff3693feff3893feff3a93feff3c93feff3e93feff4093feff4293feff4493feff4893feff4a93feff4e93feff5093feff5293feff5493feff5693feff5893feff5c93feff5e93feff6093feff6293feff6493feff6693feff6893feff4c94feff6694feff6a94feff6e94feff7694feff7a94feff7e94feff8294feff8694feff8a94feff8e94feff9694feff9a94feffa294feffa694feffaa94feffb294feffb694feffba94feffbe94feffc294feffc694feffca94feffce94feffd294feffd694feffde94feffe294feffe694feffea94fefff294fefff694fefffa94fefffe94feff0295feff0895feff1495feff2a95feff4495feff4895feff4c95feff5495feff5895feff5c95feff6095feff6495feff6895feff6c95feff7495feff7895feff8095feff8495feff8895feff9095feff9495feff9895feff9c95feffa095feffa495feffa895feffac95feffb095feffb495feffbc95feffc095feffc495feffc895feffd095feffd495feffd895feffdc95feffe095feffe695fefff295feffe4ebffff28f1ffff7af1ffff80f3ffff76f4ffff18f9ffff0463000094630000d8630000ee630000
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -742,6 +742,19 @@ MonoBehaviour:
       layout: 4
       size: {x: 0, y: 0}
       sizeOverriden: 0
+    - dockPosition: 1
+      containerId: overlay-container--right
+      floating: 0
+      collapsed: 0
+      displayed: 1
+      snapOffset: {x: 48, y: 48}
+      snapOffsetDelta: {x: 0, y: 0}
+      snapCorner: 0
+      id: UnityEditor.SceneViewCameraOverlay (0)
+      index: 9
+      layout: 4
+      size: {x: 0, y: 0}
+      sizeOverriden: 0
     m_OverlaysVisible: 1
   m_WindowGUID: cc27987af1a868c49b0894db9c0f5429
   m_Gizmos: 1
@@ -753,9 +766,9 @@ MonoBehaviour:
   m_PlayAudio: 0
   m_AudioPlay: 0
   m_Position:
-    m_Target: {x: 36.705524, y: 12.953217, z: 37.321274}
+    m_Target: {x: 13.544826, y: 24.43999, z: -1.3021891}
     speed: 2
-    m_Value: {x: 36.705524, y: 12.953217, z: 37.321274}
+    m_Value: {x: 13.544826, y: 24.43999, z: -1.3021891}
   m_RenderMode: 0
   m_CameraMode:
     drawMode: 0
@@ -801,13 +814,13 @@ MonoBehaviour:
     m_GridAxis: 1
     m_gridOpacity: 0.5
   m_Rotation:
-    m_Target: {x: 0.11097759, y: -0.04291014, z: 0.0047956426, w: 0.99288917}
+    m_Target: {x: 0.12141027, y: 0.040496536, z: -0.0049557304, w: 0.99177337}
     speed: 2
-    m_Value: {x: 0.11097709, y: -0.042909946, z: 0.0047956207, w: 0.9928847}
+    m_Value: {x: 0.12140153, y: 0.041983742, z: -0.0051377905, w: 0.9917019}
   m_Size:
-    m_Target: 27.145306
+    m_Target: 42.659473
     speed: 2
-    m_Value: 25.97637
+    m_Value: 42.659473
   m_Ortho:
     m_Target: 0
     speed: 2
@@ -973,9 +986,9 @@ MonoBehaviour:
     m_SceneHandles: 
     m_ShowAllHits: 0
     m_SkipHidden: 0
-    m_SearchArea: 0
+    m_SearchArea: 1
     m_Folders:
-    - Assets/LowCharacterPack/LowCharacter_demo/prefabs
+    - Assets/Scripts
     m_Globs: []
     m_OriginalText: 
     m_ImportLogFlags: 0
@@ -983,16 +996,16 @@ MonoBehaviour:
   m_ViewMode: 1
   m_StartGridSize: 64
   m_LastFolders:
-  - Assets/LowCharacterPack/LowCharacter_demo/prefabs
+  - Assets/Scripts
   m_LastFoldersGridSize: -1
   m_LastProjectPath: C:\Users\Usuario\Documents\GitHub\King-of-the-Island\KotI
   m_LockTracker:
     m_IsLocked: 0
   m_FolderTreeState:
     scrollPos: {x: 0, y: 18}
-    m_SelectedIDs: 406a0000
-    m_LastClickedID: 27200
-    m_ExpandedIDs: 00000000766100007c61000082610000386a000000ca9a3bffffff7f
+    m_SelectedIDs: ac5f0000
+    m_LastClickedID: 24492
+    m_ExpandedIDs: 00000000985f0000a25f0000d65f000000ca9a3bffffff7f
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -1020,7 +1033,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: 0000000076610000
+    m_ExpandedIDs: 00000000985f0000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
