@@ -109,6 +109,8 @@ public class Client : MonoBehaviour
 
             if (lastRepPacket.status == Status.Bounce)
             {
+                Debug.Log(lastRepPacket.position);
+
                 if (lastRepPacket.message == username)
                 {
                     if (lastRepPacket.message == username)
@@ -116,10 +118,6 @@ public class Client : MonoBehaviour
                         GameObject.Find("Player").GetComponent<CharacterMovement>().BounceBack(lastRepPacket.position.x, lastRepPacket.position.y, lastRepPacket.position.z);
                         Debug.Log(lastRepPacket.position);
                     }
-                }
-                else if (lastRepPacket.user == username)
-                {
-
                 }
             }
 
@@ -255,7 +253,7 @@ public class Client : MonoBehaviour
         byte[] messageBytes = SerializePacket(pack);  //Encoding.UTF8.GetBytes(responseMessage);
         udpClient.Send(messageBytes, messageBytes.Length, serverEndPoint);
 
-        Debug.Log(username + "ha pegado a " + name);
+        //Debug.Log(username + " ha pegado a " + name);
 
         //Debug.Log(JsonUtility.ToJson(pack));
 

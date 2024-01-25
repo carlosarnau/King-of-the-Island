@@ -234,14 +234,14 @@ public class Server : MonoBehaviour
 
         else if (pack.status == Status.Bounce)
         {
-            Debug.Log(pack.user);
+            //Debug.Log(pack.user);
 
             if (playersOnline.Count > 0)
             {
                 Packet bouncePacket = new Packet("Server", Status.Bounce, pack.position, new Vector3(0, 0, 0), new Vector3(0, 0, 0), Quaternion.identity, pack.message);
                 foreach (Player player in playersOnline)
                 {
-                    pack.playerList.Add(player);
+                    bouncePacket.playerList.Add(player);
                 }
 
                 var messageBytes = SerializePacket(bouncePacket);
@@ -250,7 +250,8 @@ public class Server : MonoBehaviour
                 {
                     udpListener.Send(messageBytes, messageBytes.Length, player.ip);
                 }
-                //Debug.Log("Sent replication " + JsonUtility.ToJson(pack));
+
+                Debug.Log("Sent replication " + JsonUtility.ToJson(bouncePacket));
             }
         }
 
