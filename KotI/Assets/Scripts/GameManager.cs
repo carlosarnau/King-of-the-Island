@@ -23,8 +23,8 @@ public class GameManager : MonoBehaviour
         // Move the water object upward in the Y-axis
         if (waterObject != null)
         {
-            MoveWaterUp();
-            CheckPlayerCollision();
+            //MoveWaterUp();
+            //CheckPlayerCollision();
         }
     }
 
@@ -78,5 +78,26 @@ public class GameManager : MonoBehaviour
         {
             Debug.LogError("Player game object not found. Make sure the object is tagged as 'Player'.");
         }
+    }
+
+    public Vector3 RequestSpawn()
+    {
+        Vector2 spawnPosition;
+        RaycastHit hit;
+
+        spawnPosition.x = Random.Range(-60, 150);
+        spawnPosition.y = Random.Range(-60, 150);
+
+        Vector3 direction = new Vector3(35, 5, 50) - new Vector3(spawnPosition.x, 5, spawnPosition.y);
+
+        Debug.DrawLine(new Vector3(spawnPosition.x, 5, spawnPosition.y), direction * 100f);
+
+        if (Physics.Raycast(new Vector3(spawnPosition.x, 5, spawnPosition.y), direction, out hit, 100f))
+        {
+            //cube.transform.position = hit.point;
+            return hit.point;
+        }
+
+        return RequestSpawn();
     }
 }

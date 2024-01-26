@@ -38,7 +38,7 @@ public class Client : MonoBehaviour
         }
         else
         {
-            clientPlayer = Instantiate(clientPrefab, new Vector3(34.63f, 15.5f, 27.51f), Quaternion.identity);
+            clientPlayer = Instantiate(clientPrefab, GameObject.Find("GM").GetComponent<GameManager>().RequestSpawn(), Quaternion.identity);
             clientPlayer.name = "Player";
             //clientCamera.SetActive(false);
         }
