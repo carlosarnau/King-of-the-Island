@@ -123,6 +123,11 @@ public class Client : MonoBehaviour
                     }
                 }
 
+                if (lastRepPacket.status == Status.StartGame)
+                {
+                    GameObject.Find("GM").GetComponent<GameManager>().startGame = true;
+                }
+
                 //CONNECT A PLAYER
                 if (lastRepPacket.playerList.Count > players.Count + 1)
                 {

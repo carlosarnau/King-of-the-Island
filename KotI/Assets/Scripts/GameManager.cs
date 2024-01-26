@@ -4,6 +4,7 @@ public class GameManager : MonoBehaviour
 {
     public float upwardVelocity = 5f;
     private GameObject waterObject;
+    public bool startGame = false;
 
     private bool isWaterCollisionActive = true;
 
@@ -21,9 +22,9 @@ public class GameManager : MonoBehaviour
     private void Update()
     {
         // Move the water object upward in the Y-axis
-        if (waterObject != null)
+        if (waterObject != null && startGame)
         {
-            //MoveWaterUp();
+            MoveWaterUp();
             //CheckPlayerCollision();
         }
     }

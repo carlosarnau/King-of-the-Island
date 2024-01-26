@@ -14,6 +14,8 @@ public class Server : MonoBehaviour
 
     public UdpClient udpListener;
     public GameObject playerPrefab;
+    public GameManager gameManager;
+    public bool gameStatus = false;
 
     public List<Player> playersOnline = new List<Player>();
 
@@ -101,6 +103,7 @@ public class Server : MonoBehaviour
     {
         Idle,
         Connect,
+        StartGame,
         Bounce,
         Replication,
         Disconnect,
@@ -111,6 +114,8 @@ public class Server : MonoBehaviour
     {
         if ((PlayerPrefs.GetInt("isServer")) != 1)
             this.gameObject.SetActive(false);
+
+        gameManager = GameObject.Find("GM").GetComponent<GameManager>();
     }
 
     private void Start()
@@ -151,18 +156,12 @@ public class Server : MonoBehaviour
 
     private void Update()
     {
-        /*try
+        if(playersOnline.Count == 2 && gameStatus == false)
         {
-            // Create a UDP listener on the specified port.
+            gameStatus = true;
+            StartCoroutine(StartGame());
+        }
 
-            // Start listening for incoming messages asynchronously.
-            udpListener.BeginReceive(ReceiveCallback, null);
-        }
-        catch (SocketException e)
-        {
-            Debug.LogError("Error setting up UDP server: " + e.Message);
-        }
-        */
         foreach (Packet lastPacket in receivedPackets)
         {
             if (lastPacket != null)
@@ -172,6 +171,28 @@ public class Server : MonoBehaviour
         }
         receivedPackets.Clear();
         //TODO update world
+    }
+
+    IEnumerator StartGame()
+    {
+        yield return new WaitForSeconds(3f);
+
+        gameManager.startGame = true;
+
+        Packet startGamePacket = new Packet("Server", Status.StartGame, new Vector3(0,0,0), new Vector3(0, 0, 0), new Vector3(0, 0, 0), Quaternion.identity, "Game Started");
+        foreach (Player player in playersOnline)
+        {
+            startGamePacket.playerList.Add(player);
+        }
+        
+        var messageBytes = SerializePacket(startGamePacket);
+        
+        foreach (Player player in playersOnline)
+        {
+            udpListener.Send(messageBytes, messageBytes.Length, player.ip);
+        }
+
+        Debug.Log("game started");
     }
 
     public IEnumerator SendReplication(float interval)
