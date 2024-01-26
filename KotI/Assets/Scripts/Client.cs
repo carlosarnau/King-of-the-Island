@@ -104,6 +104,7 @@ public class Client : MonoBehaviour
 
         List<Packet> tempPackets = new List<Packet>();
         tempPackets = lastRepPackets;
+        bool hasFound = false;
         //PROCESS REPLICATION
         foreach (Packet lastRepPacket in tempPackets)
         {
@@ -111,16 +112,18 @@ public class Client : MonoBehaviour
             {
                 //Debug.Log(JsonUtility.ToJson(lastRepPacket));
 
-                if (lastRepPacket.status == Status.Bounce)
+                if (lastRepPacket.status == Status.Bounce && hasFound == false)
                 {
-                    Debug.Log(lastRepPacket.position);
-
+                    Debug.Log(JsonUtility.ToJson(lastRepPacket));
+                    
                     if (lastRepPacket.message == username)
                     {
                         if (lastRepPacket.message == username)
                         {
                             GameObject.Find("Player").GetComponent<CharacterMovement>().BounceBack(lastRepPacket.position.x, lastRepPacket.position.y, lastRepPacket.position.z);
                             Debug.Log(lastRepPacket.position);
+
+                            hasFound = true;
                         }
                     }
                 }
