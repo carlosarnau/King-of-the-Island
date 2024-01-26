@@ -156,7 +156,7 @@ public class Server : MonoBehaviour
 
     private void Update()
     {
-        if(playersOnline.Count == 2 && gameStatus == false)
+        if (playersOnline.Count == 2 && gameStatus == false)
         {
             gameStatus = true;
             StartCoroutine(StartGame());
@@ -179,14 +179,14 @@ public class Server : MonoBehaviour
 
         gameManager.startGame = true;
 
-        Packet startGamePacket = new Packet("Server", Status.StartGame, new Vector3(0,0,0), new Vector3(0, 0, 0), new Vector3(0, 0, 0), Quaternion.identity, "Game Started");
+        Packet startGamePacket = new Packet("Server", Status.StartGame, new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 0, 0), Quaternion.identity, "Game Started");
         foreach (Player player in playersOnline)
         {
             startGamePacket.playerList.Add(player);
         }
-        
+
         var messageBytes = SerializePacket(startGamePacket);
-        
+
         foreach (Player player in playersOnline)
         {
             udpListener.Send(messageBytes, messageBytes.Length, player.ip);

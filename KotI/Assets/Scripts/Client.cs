@@ -102,8 +102,10 @@ public class Client : MonoBehaviour
             clientPlayer.transform.position = predictedPosition;
         }
 
+        List<Packet> tempPackets = new List<Packet>();
+        tempPackets = lastRepPackets;
         //PROCESS REPLICATION
-        foreach (Packet lastRepPacket in lastRepPackets)
+        foreach (Packet lastRepPacket in tempPackets)
         {
             if (lastRepPacket != null)
             {
@@ -191,7 +193,7 @@ public class Client : MonoBehaviour
                 //Debug.Log("Client processed a packet successfully");
             }
         }
-        lastRepPackets.Clear();
+        tempPackets.Clear();
     }
 
     private IEnumerator WaitForMessages(float interval)
@@ -255,7 +257,7 @@ public class Client : MonoBehaviour
         }
     }
 
-    public void SendBouncePacket(string name, float x, float z, float force)
+    public bool SendBouncePacket(string name, float x, float z, float force)
     {
         Vector3 vector3 = new Vector3(x, z, force);
         Packet pack = new Packet(username, Status.Bounce, vector3, clientPlayer.GetComponent<CharacterMovement>().dir, clientPlayer.GetComponent<CharacterMovement>().moveDirection, clientPlayer.transform.rotation, name);
@@ -266,7 +268,7 @@ public class Client : MonoBehaviour
 
         //Debug.Log(JsonUtility.ToJson(pack));
 
-
+        return true;
     }
 
     private IEnumerator InterpolatePosition(Vector3 targetPosition)
@@ -298,7 +300,7 @@ public class Client : MonoBehaviour
                 byte[] receivedBytes = udpClient.EndReceive(ar, ref serverEndPoint);
                 Packet responsePacket = DeserializePacket(receivedBytes);
                 HandleResponse(responsePacket);
-                lastRepPackets.Add(responsePacket); 
+                lastRepPackets.Add(responsePacket);
                 //lastRepPacket = responsePacket;
 
                 //string responseMessage = Encoding.UTF8.GetString(receivedBytes);

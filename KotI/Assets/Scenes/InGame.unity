@@ -279,7 +279,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5bb05763cf2fe8448ac151d0ffaec92, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  upwardVelocity: 0.5
+  upwardVelocity: 0
   startGame: 0
 --- !u!4 &315123092
 Transform:

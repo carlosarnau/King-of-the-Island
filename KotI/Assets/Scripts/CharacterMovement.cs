@@ -147,9 +147,9 @@ public class CharacterMovement : MonoBehaviour
         {
             canStop = true;
         }
-
         velocity.y += gravity * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
+
 
         TextMeshPro text = GetComponentInChildren<TextMeshPro>();
         if (text.gameObject != null)
