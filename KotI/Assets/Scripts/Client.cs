@@ -157,17 +157,15 @@ public class Client : MonoBehaviour
                             players[i - index].position = lastRepPacket.playerList[i].position;
                             playersObjects[i - index].transform.position = lastRepPacket.playerList[i].position;
                             playersObjects[i - index].transform.rotation = lastRepPacket.playerList[i].rotation;
-                            playersObjects[i - index].GetComponent<Rigidbody>().velocity = lastRepPacket.playerList[i].vel;
                             players[i - index].state = lastRepPacket.playerList[i].state;
-                            players[i - index].vel = lastRepPacket.playerList[i].vel;
-                            players[i - index].dir = lastRepPacket.playerList[i].dir;
+                            //playersObjects[i - index].GetComponent<Rigidbody>().velocity = lastRepPacket.playerList[i].vel;
 
                             EnemyController.EnemyState enemyState;
                             if (Enum.TryParse(players[i - index].state.ToString(), out enemyState))
                             {
                                 playersObjects[i - index].GetComponent<EnemyController>().state = enemyState;
-                                playersObjects[i - index].GetComponent<EnemyController>().dir = lastRepPacket.playerList[i].dir;
-                                playersObjects[i - index].GetComponent<EnemyController>().moveDirection = lastRepPacket.playerList[i].vel;
+                                //playersObjects[i - index].GetComponent<EnemyController>().dir = lastRepPacket.playerList[i].dir;
+                                //playersObjects[i - index].GetComponent<EnemyController>().moveDirection = lastRepPacket.playerList[i].vel;
                             }
                         }
                         else

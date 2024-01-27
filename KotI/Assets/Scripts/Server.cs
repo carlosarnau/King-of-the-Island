@@ -134,7 +134,7 @@ public class Server : MonoBehaviour
             Debug.LogError("Error setting up UDP server: " + e.Message);
         }
         StartCoroutine(WaitForMessages());
-        StartCoroutine(SendReplication(60.0f));
+        StartCoroutine(SendReplication(120.0f));
     }
 
     private IEnumerator WaitForMessages()
@@ -201,7 +201,7 @@ public class Server : MonoBehaviour
         {
             if (playersOnline.Count > 0)
             {
-                Packet pack = new Packet("Server", Status.Replication, new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 0, 0), Quaternion.identity, /*PlayerState.Idle,*/ "Replication");
+                Packet pack = new Packet("Server", Status.Replication, new Vector3(0, 0, 0), new Vector3(0, 0, 0), new Vector3(0, 0, 0), Quaternion.identity, "Replication");
                 foreach (Player player in playersOnline)
                 {
                     pack.playerList.Add(player);

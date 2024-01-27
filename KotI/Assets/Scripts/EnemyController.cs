@@ -34,23 +34,17 @@ public class EnemyController : MonoBehaviour
     public Vector3 dir;
     public Vector3 moveDirection;
 
-    public float turnSmoothTime = 0.1f;
     float turnSmoothVel;
 
     private void Start()
     {
-        groundCheck = gameObject.GetComponent<Transform>().Find("EnemyGroundCheck").GetComponent<Transform>();
+        //groundCheck = gameObject.GetComponent<Transform>().Find("EnemyGroundCheck").GetComponent<Transform>();
         animator = gameObject.GetComponentInChildren<Animator>();
-    }
-
-    private void OnDrawGizmos()
-    {
-        Gizmos.DrawSphere(groundCheck.position, groundDistance);
     }
 
     private void Update()
     {
-        isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
+        //isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
 
         switch (state)
         {
@@ -69,11 +63,8 @@ public class EnemyController : MonoBehaviour
                 break;
 
             case EnemyState.Jumping:
-                if (!isGrounded)
-                {
-                    Jump();
-                }
                 break;
+
             case EnemyState.Bouncing:
                 break;
 
@@ -85,31 +76,31 @@ public class EnemyController : MonoBehaviour
                 break;
         }
 
-        if (dir.magnitude >= 0.1f)
-        {
-            controller.Move(moveDirection.normalized * speed * Time.deltaTime);
-        }
+        //if (dir.magnitude >= 0.1f)
+        //{
+        //    controller.Move(moveDirection.normalized * speed * Time.deltaTime);
+        //}
 
-        velocity.y += gravity * Time.deltaTime;
-        controller.Move(velocity * Time.deltaTime);
+        //velocity.y += gravity * Time.deltaTime;
+        //controller.Move(velocity * Time.deltaTime);
 
-        if (isGrounded && velocity.y < 0)
-        {
-            velocity.y = -2;
-        }
+        //if (isGrounded && velocity.y < 0)
+        //{
+        //    velocity.y = -2;
+        //}
 
-        if (isGrounded && canStop)
-        {
-            velocity.x = 0;
-            velocity.z = 0;
+        //if (isGrounded && canStop)
+        //{
+        //    velocity.x = 0;
+        //    velocity.z = 0;
 
-            canStop = false;
-        }
+        //    canStop = false;
+        //}
 
-        if (velocity.y < -2)
-        {
-            canStop = true;
-        }
+        //if (velocity.y < -2)
+        //{
+        //    canStop = true;
+        //}
 
         TextMeshPro text = GetComponentInChildren<TextMeshPro>();
         if (text.gameObject != null)
@@ -122,15 +113,15 @@ public class EnemyController : MonoBehaviour
 
     }
 
-    public void Jump()
-    {
-        velocity.y = jumpForce;
-    }
+    //public void Jump()
+    //{
+    //    velocity.y = jumpForce;
+    //}
 
     public void BounceBack(float x, float z, float force)
     {
         GameObject.Find("Client").GetComponent<Client>().SendBouncePacket(gameObject.name, x, z, force);
-        Jump();
+        //Jump();
         velocity.x = x * force;
         velocity.z = z * force;
     }
