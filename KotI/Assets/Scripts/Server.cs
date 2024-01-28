@@ -134,7 +134,7 @@ public class Server : MonoBehaviour
             Debug.LogError("Error setting up UDP server: " + e.Message);
         }
         StartCoroutine(WaitForMessages());
-        StartCoroutine(SendReplication(120.0f));
+        StartCoroutine(SendReplication(64.0f));
     }
 
     private IEnumerator WaitForMessages()

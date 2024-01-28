@@ -81,8 +81,8 @@ public class Client : MonoBehaviour
         {
             Debug.LogError("Error setting up UDP client: " + e.Message);
         }
-        StartCoroutine(SendPacket(60.0f));
-        StartCoroutine(WaitForMessages(120.0f));
+        StartCoroutine(SendPacket(64.0f));
+        StartCoroutine(WaitForMessages(240.0f));
         //StartCoroutine(ProcessReplication(30.0f));
     }
 
@@ -101,10 +101,20 @@ public class Client : MonoBehaviour
             predictedPosition += clientPlayer.transform.forward * Time.deltaTime * moveSpeed;
             clientPlayer.transform.position = predictedPosition;
         }
+        //okay now that everything is replicated, let's make enemies move and stuff (ignore the beautiful functions of interpolation down below, they're useless, they didn't work anyways)
+        for (int i = 0; i < playersObjects.Count; i++)
+        {
+            if (players[i].vel.sqrMagnitude > 0.001)
+                //layersObjects[i].transform.SetPositionAndRotation(playersObjects[i].transform.position + 2.0f * Time.deltaTime * players[i].vel, playersObjects[i].transform.rotation);
+                playersObjects[i].transform.SetPositionAndRotation(playersObjects[i].transform.position + 2.0f * Time.deltaTime * (players[i].vel + new Vector3(0, 2, 0)), playersObjects[i].transform.rotation);
+        }
 
-        List<Packet> tempPackets = new List<Packet>();
-        tempPackets = lastRepPackets;
+
+        List<Packet> tempPackets = new(lastRepPackets);
         bool hasFound = false;
+        lastRepPackets.Clear();
+
+
         //PROCESS REPLICATION
         foreach (Packet lastRepPacket in tempPackets)
         {
@@ -115,7 +125,7 @@ public class Client : MonoBehaviour
                 if (lastRepPacket.status == Status.Bounce && hasFound == false)
                 {
                     Debug.Log(JsonUtility.ToJson(lastRepPacket));
-                    
+
                     if (lastRepPacket.message == username)
                     {
                         if (lastRepPacket.message == username)
@@ -154,9 +164,15 @@ public class Client : MonoBehaviour
                     {
                         if (lastRepPacket.playerList[i].userID != username)
                         {
-                            players[i - index].position = lastRepPacket.playerList[i].position;
-                            playersObjects[i - index].transform.position = lastRepPacket.playerList[i].position;
-                            playersObjects[i - index].transform.rotation = lastRepPacket.playerList[i].rotation;
+                            if (lastRepPacket.playerList[i].position != players[i - index].position)
+                            {
+                                players[i - index].position = lastRepPacket.playerList[i].position;
+                                playersObjects[i - index].transform.position = lastRepPacket.playerList[i].position;
+                                playersObjects[i - index].transform.rotation = lastRepPacket.playerList[i].rotation;
+                            }
+                            if (lastRepPacket.playerList[i].vel != players[i - index].vel)
+                            players[i - index].vel = lastRepPacket.playerList[i].vel;
+                            
                             players[i - index].state = lastRepPacket.playerList[i].state;
                             //playersObjects[i - index].GetComponent<Rigidbody>().velocity = lastRepPacket.playerList[i].vel;
 
@@ -195,6 +211,7 @@ public class Client : MonoBehaviour
             }
         }
         tempPackets.Clear();
+
     }
 
     private IEnumerator WaitForMessages(float interval)
@@ -247,7 +264,7 @@ public class Client : MonoBehaviour
             // Simulate the packet loss by randomly deciding whether to send the packet
             //if (Random.value < 0.5f) // Adjustable (in this case 0.9 represents a 90% chance of sending the package)
             {
-                Packet pack = new Packet(username, Status.Movement, clientPlayer.transform.position, clientPlayer.GetComponent<CharacterMovement>().dir, clientPlayer.GetComponent<CharacterMovement>().moveDirection, clientPlayer.transform.rotation, clientPlayer.GetComponent<CharacterMovement>().playerState.ToString());
+                Packet pack = new Packet(username, Status.Movement, clientPlayer.transform.position, clientPlayer.GetComponent<CharacterMovement>().dir, clientPlayer.GetComponent<CharacterController>().velocity, clientPlayer.transform.rotation, clientPlayer.GetComponent<CharacterMovement>().playerState.ToString());
                 byte[] messageBytes = SerializePacket(pack);  //Encoding.UTF8.GetBytes(responseMessage);
                 udpClient.Send(messageBytes, messageBytes.Length, serverEndPoint);
 
@@ -329,20 +346,20 @@ public class Client : MonoBehaviour
                 //Debug.Log("Received Replication: " + responsePacket.message);
             }
 
-        if (responsePacket.status == Status.Movement)
-        {
-            Vector3 serverPosition = responsePacket.position;
-            // players[i].playerState = responsePacket.playerState;
+        //if (responsePacket.status == Status.Movement) cringe code
+        //{
+        //    Vector3 serverPosition = responsePacket.position;
+        //    // players[i].playerState = responsePacket.playerState;
 
-            // Perform reconciliation
-            float distance = Vector3.Distance(predictedPosition, serverPosition);
+        //    // Perform reconciliation
+        //    float distance = Vector3.Distance(predictedPosition, serverPosition);
 
-            if (distance > reconciliationThreshold)
-            {
-                // Adjust the local player's position to match the server's position
-                StartCoroutine(InterpolatePosition(serverPosition));
-            }
-        }
+        //    if (distance > reconciliationThreshold)
+        //    {
+        //        // Adjust the local player's position to match the server's position
+        //        StartCoroutine(InterpolatePosition(serverPosition));
+        //    }
+        //}
     }
 
     private void OnDestroy()
