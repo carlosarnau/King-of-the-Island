@@ -10,7 +10,8 @@ public class EnemyController : MonoBehaviour
         Running,
         Jumping,
         Attacking,
-        Bouncing
+        Bouncing,
+        Win
     }
 
     public Animator animator;
@@ -111,6 +112,14 @@ public class EnemyController : MonoBehaviour
             text.text = name;
         }
 
+    }
+
+    public void UpdateWin()
+    {
+        int randomAnim = Random.Range(1, 3) + 9;
+        state = EnemyState.Win;
+
+        animator.SetInteger("AnimationType", randomAnim);
     }
 
     //public void Jump()

@@ -10,7 +10,8 @@ public class CharacterMovement : MonoBehaviour
         Running,
         Jumping,
         Attacking,
-        Bouncing
+        Bouncing,
+        Win
     }
 
     public Animator animator;
@@ -91,6 +92,7 @@ public class CharacterMovement : MonoBehaviour
             velocity.y = -2;
         }
 
+
         float horizontal = Input.GetAxisRaw("Horizontal");
         float vertical = Input.GetAxisRaw("Vertical");
 
@@ -160,6 +162,14 @@ public class CharacterMovement : MonoBehaviour
             text.text = PlayerPrefs.GetString("username");
         }
 
+    }
+
+    public void UpdateWin()
+    {
+        int randomAnim = Random.Range(1, 3) + 9;
+        playerState = PlayerState.Win;
+
+        animator.SetInteger("AnimationType", randomAnim);
     }
 
     private void Jump()

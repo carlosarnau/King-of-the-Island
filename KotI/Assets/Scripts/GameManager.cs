@@ -50,6 +50,7 @@ public class GameManager : MonoBehaviour
             cameraController.LookAt = GameObject.Find(GameObject.Find("Client").GetComponent<Client>().playersObjects[0].name).transform;
             cameraController.Follow = GameObject.Find(GameObject.Find("Client").GetComponent<Client>().playersObjects[0].name).transform;
             KillPlayer();
+            GameObject.Find("Client").GetComponent<Client>().playersObjects[0].GetComponent<EnemyController>().UpdateWin();
             startGame = false;
         }
     }
@@ -68,6 +69,8 @@ public class GameManager : MonoBehaviour
         {
             Debug.LogError("Player game object not found. Make sure the object is tagged as 'Player'.");
         }
+
+        GameObject.Find("Staff").SetActive(false);
     }
 
     public Vector3 RequestSpawn()

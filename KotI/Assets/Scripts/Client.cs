@@ -146,8 +146,10 @@ public class Client : MonoBehaviour
                 if (lastRepPacket.status == Status.Die && lastRepPacket.message != username)
                 {
                     GameObject.Find("GM").GetComponent<GameManager>().startGame = false;
+                    GameObject.Find("Player").GetComponent<CharacterMovement>().UpdateWin();
+                    GameObject.Find("Staff").SetActive(false);
 
-                    for(int i = 0; i < playersObjects.Count; i++)
+                    for (int i = 0; i < playersObjects.Count; i++)
                     {
                         if (playersObjects[i] != null && playersObjects[i].name == lastRepPacket.message)
                         {
