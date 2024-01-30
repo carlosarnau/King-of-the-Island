@@ -105,7 +105,9 @@ public class Server : MonoBehaviour
         Connect,
         StartGame,
         Bounce,
+        Die,
         Replication,
+        EndGame,
         Disconnect,
         Chat,
         Movement
@@ -251,6 +253,35 @@ public class Server : MonoBehaviour
                 //if ()
             }
             Debug.Log("Player " + pack.user + " disconnected");
+        }
+
+        else if (pack.status == Status.Die)
+        {
+            GameObject.Find("GM").GetComponent<GameManager>().startGame = false;
+            Packet diePacket = new Packet("Server", Status.Die, new Vector3 (0,0,0), new Vector3(0, 0, 0), new Vector3(0, 0, 0), Quaternion.identity, pack.user);
+
+            for (int i = 0; i < playersOnline.Count; i++)
+            {
+                if (playersOnline[i].userID == pack.user)
+                {
+                    Destroy(playerObjects[i]);
+                    playerObjects.RemoveAt(i);
+                }
+            }
+
+            foreach (Player player in playersOnline)
+            {
+                diePacket.playerList.Add(player);
+            }
+
+            var messageBytes = SerializePacket(diePacket);
+
+            foreach (Player player in playersOnline)
+            {
+                udpListener.Send(messageBytes, messageBytes.Length, player.ip);
+            }
+
+            Debug.Log("Player " + pack.user + " died");
         }
 
         else if (pack.status == Status.Bounce)

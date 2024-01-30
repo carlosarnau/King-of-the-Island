@@ -143,6 +143,20 @@ public class Client : MonoBehaviour
                     GameObject.Find("GM").GetComponent<GameManager>().startGame = true;
                 }
 
+                if (lastRepPacket.status == Status.Die && lastRepPacket.message != username)
+                {
+                    GameObject.Find("GM").GetComponent<GameManager>().startGame = false;
+
+                    for(int i = 0; i < playersObjects.Count; i++)
+                    {
+                        if (playersObjects[i] != null && playersObjects[i].name == lastRepPacket.message)
+                        {
+                            Destroy(playersObjects[i]);
+                            playersObjects.RemoveAt(i);
+                        }
+                    }
+                }
+
                 //CONNECT A PLAYER
                 if (lastRepPacket.playerList.Count > players.Count + 1)
                 {
@@ -179,7 +193,10 @@ public class Client : MonoBehaviour
                             EnemyController.EnemyState enemyState;
                             if (Enum.TryParse(players[i - index].state.ToString(), out enemyState))
                             {
-                                playersObjects[i - index].GetComponent<EnemyController>().state = enemyState;
+                                if(playersObjects[i - index] != null)
+                                {
+                                    playersObjects[i - index].GetComponent<EnemyController>().state = enemyState;
+                                }
                                 //playersObjects[i - index].GetComponent<EnemyController>().dir = lastRepPacket.playerList[i].dir;
                                 //playersObjects[i - index].GetComponent<EnemyController>().moveDirection = lastRepPacket.playerList[i].vel;
                             }
@@ -231,46 +248,17 @@ public class Client : MonoBehaviour
         }
     }
 
-    //private IEnumerator ProcessReplication(float interval)  DEPRECATED
-    //{
-    //    while (true)
-    //    {
-    //        if (lastRepPacket != null)
-    //        {
-    //            if (players.Count != lastRepPacket.playerList.Count)
-    //                Debug.Log("Client detected a Player has connected or disconnected");
-    //            //TODO foreach Object add object to objectsList
-
-    //            //foreach (Player player in playersOnline)
-    //            //{
-    //            //    udpListener.Send(messageBytes, messageBytes.Length, player.ip);
-
-    //            //}
-
-    //            lastRepPacket = null;
-    //            Debug.Log("Client processed a packet successfully");
-    //        }
-    //        yield return new WaitForSeconds(1.0f / interval);
-    //    }
-    //}
-
     private IEnumerator SendPacket(float interval)
     {
         while (true)
         {
             // Adding a ranadom delay between 0 and 0.1 seconds to simulate Jitter
             yield return new WaitForSeconds(Random.Range(0, 0.1f));
-
-            // Simulate the packet loss by randomly deciding whether to send the packet
-            //if (Random.value < 0.5f) // Adjustable (in this case 0.9 represents a 90% chance of sending the package)
-            {
-                Packet pack = new Packet(username, Status.Movement, clientPlayer.transform.position, clientPlayer.GetComponent<CharacterMovement>().dir, clientPlayer.GetComponent<CharacterController>().velocity, clientPlayer.transform.rotation, clientPlayer.GetComponent<CharacterMovement>().playerState.ToString());
-                byte[] messageBytes = SerializePacket(pack);  //Encoding.UTF8.GetBytes(responseMessage);
-                udpClient.Send(messageBytes, messageBytes.Length, serverEndPoint);
-
-                //Debug.Log(JsonUtility.ToJson(pack));
-
-            }
+          
+            Packet pack = new Packet(username, Status.Movement, clientPlayer.transform.position, clientPlayer.GetComponent<CharacterMovement>().dir, clientPlayer.GetComponent<CharacterController>().velocity, clientPlayer.transform.rotation, clientPlayer.GetComponent<CharacterMovement>().playerState.ToString());
+            byte[] messageBytes = SerializePacket(pack);  //Encoding.UTF8.GetBytes(responseMessage);
+            udpClient.Send(messageBytes, messageBytes.Length, serverEndPoint);
+            
             yield return new WaitForSeconds(1.0f / interval);
         }
     }
@@ -287,6 +275,13 @@ public class Client : MonoBehaviour
         //Debug.Log(JsonUtility.ToJson(pack));
 
         return true;
+    }
+
+    public void SendDiePacket()
+    {
+        Packet pack = new Packet(username, Status.Die, Vector3.forward, clientPlayer.GetComponent<CharacterMovement>().dir, clientPlayer.GetComponent<CharacterMovement>().moveDirection, clientPlayer.transform.rotation, name);
+        byte[] messageBytes = SerializePacket(pack);  //Encoding.UTF8.GetBytes(responseMessage);
+        udpClient.Send(messageBytes, messageBytes.Length, serverEndPoint);
     }
 
     private IEnumerator InterpolatePosition(Vector3 targetPosition)

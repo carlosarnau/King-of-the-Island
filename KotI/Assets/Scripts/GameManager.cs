@@ -1,4 +1,5 @@
 using UnityEngine;
+using Cinemachine;
 
 public class GameManager : MonoBehaviour
 {
@@ -6,10 +7,13 @@ public class GameManager : MonoBehaviour
     private GameObject waterObject;
     public bool startGame = false;
 
+    public CinemachineFreeLook cameraController;
+
     private bool isWaterCollisionActive = true;
 
     private void Start()
     {
+        cameraController = GameObject.Find("Third Person Camera").GetComponent<CinemachineFreeLook>();
         // Find the water game object by name
         waterObject = GameObject.Find("Water");
 
@@ -25,7 +29,7 @@ public class GameManager : MonoBehaviour
         if (waterObject != null && startGame)
         {
             MoveWaterUp();
-            //CheckPlayerCollision();
+            CheckPlayerCollision();
         }
     }
 
@@ -38,30 +42,15 @@ public class GameManager : MonoBehaviour
     private void CheckPlayerCollision()
     {
         // Assuming your player has a collider and is tagged as "Player"
-        Collider playerCollider = GameObject.FindWithTag("Player").GetComponent<Collider>();
+        Collider playerCollider = GameObject.FindWithTag("Player").GetComponent<CapsuleCollider>();
 
         if (playerCollider != null && isWaterCollisionActive && playerCollider.bounds.Intersects(waterObject.GetComponent<Collider>().bounds))
         {
-            // When player collides with water kill the player and deactivate the water collision
-            DeactivateWaterCollision();
+            GameObject.Find("Client").GetComponent<Client>().SendDiePacket();
+            cameraController.LookAt = GameObject.Find(GameObject.Find("Client").GetComponent<Client>().playersObjects[0].name).transform;
+            cameraController.Follow = GameObject.Find(GameObject.Find("Client").GetComponent<Client>().playersObjects[0].name).transform;
             KillPlayer();
-        }
-    }
-
-    private void DeactivateWaterCollision()
-    {
-        Debug.Log("Water collision deactivated!");
-
-        // Disable the collider of the water object
-        Collider waterCollider = waterObject.GetComponent<Collider>();
-        if (waterCollider != null)
-        {
-            waterCollider.enabled = false;
-            isWaterCollisionActive = false;
-        }
-        else
-        {
-            Debug.LogError("Water collider not found.");
+            startGame = false;
         }
     }
 
