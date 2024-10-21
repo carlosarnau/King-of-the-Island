@@ -3,6 +3,8 @@
 ### Description
 **King of the Island** is a multiplayer game where players fight to stay at the highest point of an island. As soon as the match begins, players spawn on an island and the sea level starts rising. If a player touches the water, they die. The players are ninjas equipped with a staff that can push enemies when hit.
 
+[Showcase video](https://www.youtube.com/watch?v=bEm4sebyaCE)
+
 ### Technologies Used
 - **C#**
 - **Unity**
